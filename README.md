@@ -1,95 +1,112 @@
-# 🌍 GeoIntel: Proxy-Assisted IP Intelligence
-
-**Tired of rate limits blocking your geolocation queries? GeoIntel finds, validates, and uses fresh proxies to bypass API restrictions and give you deep IP insights!**
-
 <p align="center">
-  <img src="https://img.shields.io/badge/Language-Python%203.8%2B-blue?style=for-the-badge&logo=python" alt="Python 3.8+ Badge">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License Badge">
-  <img src="https://img.shields.io/badge/Dependencies-rich%2C%20requests%2C%20tqdm-brightgreen?style=for-the-badge" alt="Dependencies Badge">
-  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status Active Badge">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="Python 3.8+">
+  <img src="https://img.shields.io/badge/Dependencies-Rich%2C%20Cloudscraper%2C%20Tqdm-brightgreen" alt="Dependencies">
 </p>
 
-**GeoIntel** is an advanced Python script that combines **real-time proxy fetching and verification** with **multi-source IP intelligence** and **optional reverse geocoding**. It ensures you get the data you need, even when direct requests fail.
+# 🌍 GeoIntel: Proxy-Assisted IP Geolocation & Intelligence
+
+## 💡 Overview
+
+**GeoIntel** is a powerful, refactored, and enhanced tool for gathering comprehensive geolocation and intelligence data on any target IP address or hostname.
+
+Forget relying on a single, rate-limited API. GeoIntel uses an **adaptive proxy rotation system** to bypass detection, scrape fresh proxies, and seamlessly merge data from multiple high-quality geolocation APIs like `ip-api.com` and `ipwho.is`. It even includes robust handling for **Cloudflare** challenges and integrates **OpenCage** for precise reverse-geocoding.
+
+Whether you're performing reconnaissance, analyzing network traffic, or just curious about an IP's origin, GeoIntel delivers fast, consolidated, and detailed results.
 
 ---
 
 ## ✨ Key Features
 
-* **🛡️ Proxy Resilience:** Automatically scrapes, deduplicates, and quickly verifies **hundreds of free proxies** from multiple sources using concurrent threads (fast TCP checks).
-* **🔗 Smart Fallback:** Attempts direct requests first, but gracefully falls back to a **random, verified proxy** if a connection error, rate-limit (`429`/`402`), or general request failure occurs.
-* **📍 Multi-Source Geolocation:** Gathers data from popular APIs like `ip-api.com` and `ipwho.is` for comprehensive coverage.
-* **🗺️ Optional Reverse Geocode:** Uses **OpenCage** to turn coordinates into a detailed, human-readable address (requires API key).
-* **🎨 Stunning Output:** Features a clean, professional, and easy-to-read console display powered by the **rich** library.
+* **🛡️ Proxy Powerhouse:** Scrapes fresh, verified HTTP/S proxies from multiple online sources and conducts a full **socket + HTTP forwarding test** to ensure reliability.
+* **🔄 Adaptive Rotation:** Uses a built-in proxy rotation system with `cloudscraper` fallback to reliably fetch data and navigate **Cloudflare protection** and rate limits.
+* **📊 Data Fusion:** Intelligently **merges geolocation data** from `ip-api.com` and `ipwho.is` for the most complete result set.
+* **🗺️ Reverse Geocoding:** Integrates with **OpenCage Geocoding API** for detailed address-level reverse lookups (requires API key).
+* **⚡ High Performance:** Utilizes an **adaptive thread pool** based on CPU count for fast proxy verification and concurrent data fetching.
+* **💾 Smart Proxy Management:** Saves and reuses known **working proxies** to speed up subsequent scans.
+* **🪵 Structured Logging:** Logs detailed activity to a file (`geointel.log`) and the console for easy debugging and tracking.
+* **💻 Clean CLI:** A minimal, clear, and engaging command-line interface powered by `rich`.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
 ### Prerequisites
 
-You need **Python 3.x** installed. Then, install the required packages:
+* Python 3.8+
 
-```bash
-pip install requests beautifulsoup4 rich tqdm
+### Steps
+
+1.  **Clone the repository (if applicable) and navigate into the directory.**
+2.  **Install the required dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *(Note: You'll need to create a `requirements.txt` file listing the dependencies: `requests`, `cloudscraper`, `beautifulsoup4`, `tqdm`, `rich`, `python-dotenv`, and `concurrent-futures`.)*
+
+---
+
+## ⚙️ Configuration
+
+GeoIntel uses a **`.env`** file for configuration. Create a file named `.env` in the same directory as `main.py`.
+
+### Essential Configuration
+
+| Environment Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `OPENCAGE_API_KEY` | (empty string) | **Required for reverse geocoding.** Get a key from OpenCage. |
+| `SAVE_WORKING_PROXIES` | `working_proxies.txt` | Path to save/load verified proxies. |
+| `MAX_WORKERS` | 50 | Maximum threads for proxy verification/data fetching. |
+
+### Example `.env` file:
+
+```env
+# Optional: Get a key from OpenCage to enable reverse geocoding
+OPENCAGE_API_KEY="YOUR_OPENCAGE_API_KEY_HERE"
+
+# Optional: Adjust proxy scraping sources (comma-separated URLs)
+# PROXY_SOURCES="[https://free-proxy-list.net/,https://www.sslproxies.org/](https://free-proxy-list.net/,https://www.sslproxies.org/)"
+
+# Optional: Log file location
+# LOG_FILE="geointel.log"
 ````
 
-### Usage
+-----
 
-1.  **Configure API Key (Optional):**
-    To use the advanced **OpenCage Reverse Geocode** feature, you must update the API key within the script (`geointel_optimized.py`):
+## 🎯 Usage
 
-    ```python
-    # geointel_optimized.py 
-    OPENCAGE_API_KEY = "YOUR_OPENCAGE_KEY_HERE" # Replace with your actual key
-    ```
+### Basic Scan (Auto-Detect Your IP)
 
-2.  **Run the Tool:**
+If you run the tool without a target, it will automatically detect and geolocate your public IP address.
 
-    ```bash
-    python geointel_optimized.py
-    ```
+```bash
+python3 main.py
+```
 
-3.  **Input Target:**
-    The script will first scrape and verify proxies. Once complete, it will prompt you:
+### Scan a Specific Target
 
-    > **Enter target IP or hostname (leave empty to auto-detect your IP):**
+Provide an IP address or hostname using the `--target` flag.
 
-      * Leave it **empty** to find the intelligence for **your current public IP**.
-      * Enter any **IP address** or **hostname** (e.g., `google.com`).
+```bash
+python3 main.py --target 8.8.8.8
+# or
+python3 main.py -t example.com
+```
+
+### Command Line Options
+
+| Flag | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `--target`, `-t` | String | None | Target IP or hostname. |
+| `--no-opencage` | Flag | False | Skip OpenCage reverse geocoding, even if the key is set. |
+| `--threads` | Integer | Adaptive | Manually set max worker threads. |
+| `--timeout` | Integer | 10 | Request timeout in seconds. |
+| `--debug` | Flag | False | Enable verbose debug logging. |
 
 -----
 
-## ⚙️ Configuration (Inside the Script)
+## 🛑 Disclaimer
 
-You can easily adjust the scraping and verification parameters:
+**Use this tool responsibly and legally.** GeoIntel is designed for security professionals and network administrators. Only use it on networks and targets that you own or have explicit, written permission to test. The developers are not responsible for misuse.
 
-| Variable | Description | Default Value |
-| :--- | :--- | :--- |
-| `OPENCAGE_API_KEY` | Your OpenCage Geocoding API key for reverse lookup. | `7733d728...` |
-| `PROXY_SOURCES` | List of URLs the script scrapes free proxies from. | 5 different URLs |
-| `MAX_WORKERS` | Maximum concurrent threads for fast proxy verification. | `50` |
-
------
-
-## 💡 How It Works
-
-1.  **Scrape & Verify:** Fetches proxies from defined sources and runs a **concurrent TCP connect check** to quickly filter out unusable connections.
-2.  **Intelligent Request:** Attempts direct API calls. If the call fails (due to connection errors or API rate limits), it automatically retries the request using a random, working proxy from the verified list.
-3.  **Data Aggregation:** Collects location and ASN/ISP data from multiple geolocation APIs.
-4.  **Enrichment:** If geographic coordinates are available and the OpenCage key is set, it performs a **reverse geocode** lookup to provide detailed address information.
-
------
-
-## 📜 Licensing
-
-This project is licensed under the **MIT License**.
-
------
-
-## 💜 Credits
-
-Built with ❤️ by zanesense for open-source use. 
-
------
-
-**Get started with GeoIntel today and never get rate-limited again\!**
+Let me know if you would like me to generate the `requirements.txt` file based on the imports in `main.py`\!
