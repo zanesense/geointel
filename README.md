@@ -108,5 +108,3 @@ python3 main.py -t example.com
 ## 🛑 Disclaimer
 
 **Use this tool responsibly and legally.** GeoIntel is designed for security professionals and network administrators. Only use it on networks and targets that you own or have explicit, written permission to test. The developers are not responsible for misuse.
-
-Let me know if you would like me to generate the `requirements.txt` file based on the imports in `main.py`\!
