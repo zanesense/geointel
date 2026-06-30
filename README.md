@@ -17,11 +17,11 @@
 <h3 align="center">IP & domain intelligence — dashboard, CLI, and JSON API in a single workspace</h3>
 
 <p align="center">
-  <a href="#-quick-start"><b>Quick start →</b></a>
+  <a href="#quick-start"><b>Quick start →</b></a>
   &nbsp;·&nbsp;
-  <a href="#-usage"><b>Usage →</b></a>
+  <a href="#usage"><b>Usage →</b></a>
   &nbsp;·&nbsp;
-  <a href="#-collectors"><b>Collectors →</b></a>
+  <a href="#collectors"><b>Collectors →</b></a>
   &nbsp;·&nbsp;
   <a href="https://geointel-eight.vercel.app"><b>Live demo →</b></a>
 </p>
