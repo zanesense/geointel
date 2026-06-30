@@ -41,13 +41,14 @@ export default function DocsPage() {
           <section id="quick-start">
             <h2>Quick start</h2>
             <p>Install the Python dependencies, build the frontend, and start FastAPI from the repository root.</p>
-            <pre><code>{`python -m pip install -r requirements.txt
+            <pre><code>{`pip install -r requirements.txt
+pip install -e .
 cd frontend
 npm install
 npm run build
 cd ..
 uvicorn app.main:app --reload`}</code></pre>
-            <p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. The OpenAPI interface is available separately at <a href="/api/docs">/api/docs</a>.</p>
+            <p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. The <code>geointel</code> CLI command is available after <code>pip install -e .</code>. The OpenAPI interface is at <a href="/api/docs">/api/docs</a>.</p>
           </section>
 
           <section id="workflow">

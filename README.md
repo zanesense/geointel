@@ -30,7 +30,7 @@ GeoIntel is an open-source OSINT workspace that consolidates 14 infrastructure i
 Three surfaces, one engine:
 
 - **Dashboard** — React SPA with interactive map, per-module result views, and optional OpenCage enrichment
-- **CLI** — `python -m app` with formatted output for pipelining and scripting
+- **CLI** — `geointel` command with subcommands, multiple output formats, and shell completion
 - **JSON API** — RESTful endpoints returning structured results for integration
 
 > ⚠️ **Authorization is non-negotiable.** Port scanning, banner collection, connectivity checks, and DNS zone-transfer probes are active operations. Use this tool only on assets you own or have written permission to test.
@@ -50,7 +50,7 @@ Three surfaces, one engine:
 - 🛰️ **14 intelligence modules** — geolocation, DNS, WHOIS, SSL/TLS, HTTP headers, reverse DNS, RDAP, subdomains, email security, web intelligence, public file discovery, port scanning, connectivity checks, and zone-transfer auditing
 - ⚡ **Concurrent full scan** — runs every module in parallel; one failure never discards the rest of the report
 - 🌐 **Interactive dashboard** — Leaflet map, real-time results, OpenCage timezone/currency enrichment
-- 🖥️ **Feature-complete CLI** — pretty (Rich-themed), JSON, CSV, and flat key-value output modes, plus OpenCage enrichment and scan history
+- 🖥️ **Feature-complete CLI** — `geointel lookup`/`scan`/`fullscan`/`history`/`info`/`config`/`completion`, multiple output formats (pretty, JSON, CSV, simple), OpenCage enrichment, shell completions, and config file
 - 🔗 **RESTful JSON API** — POST endpoints for single and full scans, designed for automation
 - 🛡️ **Safety-first** — private/reserved addresses rejected for active modules; redirects revalidated; scans bounded to TCP 1–1024 plus select high-value ports
 - 🔌 **Zero API keys required** — all passive collectors query public sources with no registration
@@ -64,7 +64,7 @@ flowchart TD
     U[User] --> D{ }
 
     D -- Dashboard --> R["<b>React SPA</b><br/><i>frontend/</i>"]
-    D -- CLI --> C["<b>python -m app</b><br/><i>app/__main__.py</i>"]
+    D -- CLI --> C["<b>geointel</b><br/><i>app/__main__.py</i>"]
     D -- API --> F["<b>FastAPI server</b><br/><i>app/main.py</i>"]
 
     R --> F
@@ -108,7 +108,7 @@ The FastAPI backend dispatches each collector in its own thread. Active modules 
 | `connectivity` | Connectivity | Public IP or domain | Active | Reachability and latency for SSH, SMTP, DNS, HTTP(S) |
 | `zone_transfer` | Zone Transfer | Domain | Active | AXFR exposure check against authoritative name servers |
 
-The `full` meta-module runs all 14 concurrently via the CLI (`-t full`) or API (`/api/full-scan`).
+The `full` meta-module runs all 14 concurrently via the CLI (`geointel fullscan --target <target>`) or API (`/api/full-scan`).
 
 ---
 
@@ -118,10 +118,13 @@ The `full` meta-module runs all 14 concurrently via the CLI (`-t full`) or API (
 # 1. Install Python dependencies
 python -m pip install -r requirements.txt
 
-# 2. Build the frontend
+# 2. Install the geointel CLI
+pip install -e .
+
+# 3. Build the frontend (optional, CLI-only users can skip)
 cd frontend && npm install && npm run build && cd ..
 
-# 3. Start
+# 4. Start the server
 uvicorn app.main:app --reload
 ```
 
@@ -132,8 +135,9 @@ uvicorn app.main:app --reload
 ### CLI-only (no frontend build)
 
 ```bash
-python -m pip install -r requirements.txt
-python -m app example.com -t dns
+pip install -r requirements.txt
+pip install -e .
+geointel lookup --target example.com --type dns
 ```
 
 ---
@@ -147,44 +151,47 @@ Open `http://127.0.0.1:8000`, enter a target, and select collectors from the mod
 ### CLI
 
 ```bash
-# Quick GeoIP lookup (pretty output with map-ready coordinates)
-  geointel lookup --target 8.8.8.8
+# Quick GeoIP lookup
+geointel lookup --target 8.8.8.8
 
-# DNS scan
-  geointel scan --target example.com --type dns
+# Specific scan type
+geointel scan --target example.com --type dns
 
-# Full recon (all scan types, JSON output)
-  geointel fullscan --target example.com --json
+# Multi-type scan (runs concurrently)
+geointel scan --target example.com --type dns,whois,ssl
 
-# Show version and available modules
-  geointel info
+# Full recon (all 14 collectors)
+geointel fullscan --target example.com
 
-# DNS records
-python -m app example.com -t dns
-
-# Multiple scans (comma-separated)
-python -m app example.com -t dns,whois,ssl,http
-
-# Port scan
-python -m app scanme.nmap.org -t ports
-
-# Full reconnaissance (all 14 collectors, JSON output)
-python -m app example.com -t full --json
-
-# Flat key-value output
-python -m app example.com -t rdap --simple
+# JSON output
+geointel fullscan --target example.com --json
 
 # CSV export
-python -m app 8.8.8.8 -t quick --csv
+geointel lookup --target 8.8.8.8 -t quick --csv
 
-# OpenCage enrichment (timezone, currency, formatted address)
-python -m app 8.8.8.8 --opencage-key YOUR_KEY
+# Flat key-value output
+geointel lookup --target example.com -t rdap --simple
 
-# View recent scan history
-python -m app --history
+# Scan history
+geointel history
 
-# Skip ASCII logo (for scripting)
-python -m app 8.8.8.8 --no-logo
+# Show version and available modules
+geointel info
+
+# OpenCage enrichment
+geointel lookup --target 8.8.8.8 --opencage-key YOUR_KEY
+
+# Skip logo for scripting
+geointel lookup --target 8.8.8.8 --no-logo
+
+# Persistent config (saves to ~/.geointel/config.json)
+geointel config --set opencage_key=YOUR_KEY
+
+# View current config
+geointel config --show
+
+# Generate shell completions
+geointel completion bash > /etc/bash_completion.d/geointel
 ```
 
 ### REST API
@@ -249,13 +256,24 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ## Configuration
 
-GeoIntel runs with zero configuration. The following environment variables are optional:
+GeoIntel runs with zero configuration. Settings are resolved in this order: CLI flag → environment variable → config file.
 
-| Variable | Required | Default | Description |
-| :--- | :-: | :--- | :--- |
-| `OPENCAGE_API_KEY` | ⛔ | — | Adds timezone, currency, formatted address, and confidence to GeoIP results |
+| Method | Example | Precedence |
+| :--- | :--- | :-: |
+| CLI flag | `--opencage-key YOUR_KEY` | 1st |
+| Environment | `OPENCAGE_API_KEY=YOUR_KEY` | 2nd |
+| Config file | `geointel config --set opencage_key=YOUR_KEY` | 3rd |
 
-The OpenCage key lives in browser memory and is proxied through the backend (`POST /api/geocode`). It is never persisted on disk or sent to third parties directly from the browser.
+The config file lives at `~/.geointel/config.json` and is managed via `geointel config`:
+
+```bash
+geointel config --show              # view current config
+geointel config --set key=value     # set a value
+geointel config --unset key         # remove a value
+geointel config --reset             # delete config file
+```
+
+The OpenCage key is proxied through the backend (`POST /api/geocode`) and held in browser memory — never persisted on disk or sent directly from the browser.
 
 ---
 
@@ -268,7 +286,7 @@ The OpenCage key lives in browser memory and is proxied through the backend (`PO
 | Language | [Python 3.12](https://python.org/) + [TypeScript 6](https://www.typescriptlang.org/) |
 | Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
 | Maps | [Leaflet](https://leafletjs.com/) |
-| CLI runtime | `python -m app` |
+| CLI runtime | `geointel` (via `pip install -e .`) |
 | Deployment | [Vercel](https://vercel.com/) (Python + static) · `uvicorn` (local) |
 | CI / CD | GitHub Actions · CodeQL · Dependabot |
 
@@ -279,6 +297,7 @@ The OpenCage key lives in browser memory and is proxied through the backend (`PO
 - **Python 3.10+** (3.12 recommended for Vercel)
 - **Node.js 20+** and **npm** (for frontend builds)
 - Zero external API keys
+- Requires `pip install -e .` to make the `geointel` CLI command available
 
 ---
 
