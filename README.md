@@ -179,6 +179,9 @@ python -m app 8.8.8.8 --opencage-key YOUR_KEY
 
 # View recent scan history
 python -m app --history
+
+# Skip ASCII logo (for scripting)
+python -m app 8.8.8.8 --no-logo
 ```
 
 ### REST API
@@ -187,18 +190,28 @@ python -m app --history
 # List modules
 curl http://127.0.0.1:8000/api/scan-types
 
+# Quick GeoIP lookup
+curl -X POST http://127.0.0.1:8000/api/lookup \
+  -H 'Content-Type: application/json' \
+  -d '{"target":"8.8.8.8"}'
+
 # Single module
 curl -X POST http://127.0.0.1:8000/api/scan \
   -H 'Content-Type: application/json' \
   -d '{"target":"example.com","scan_type":"dns"}'
 
-# Full scan (all collectors)
+# Full scan (all 14 collectors)
 curl -X POST http://127.0.0.1:8000/api/full-scan \
   -H 'Content-Type: application/json' \
   -d '{"target":"example.com"}'
+
+# Geocoding enrichment (OpenCage)
+curl -X POST http://127.0.0.1:8000/api/geocode \
+  -H 'Content-Type: application/json' \
+  -d '{"lat":39.03,"lon":-77.5,"api_key":"YOUR_KEY"}'
 ```
 
-Full scans return `{"results":{…}, "errors":{…}}` — one module failure never discards the rest.
+Full scans return `{"results":{…}, "errors":{…}}` — one module failure never discards the rest. The geocode endpoint adds timezone, currency, and formatted address to GeoIP results.
 
 ---
 
@@ -208,7 +221,6 @@ Full scans return `{"results":{…}, "errors":{…}}` — one module failure nev
 | :--- | :--- | :--- | :-: | :--- |
 | **Vercel** (recommended) | Static (`frontend/dist/`) | Python serverless | ❌ | One click |
 | **Local / VPS** | FastAPI-served | `uvicorn` | ✅ | `pip install + build` |
-| **Docker** | Nginx-served | `uvicorn` | ✅ | `docker compose up` |
 
 > Active modules (port scan, connectivity, zone transfer) use raw sockets and do **not** work in Vercel's serverless sandbox. Run them locally or on a VPS.
 
@@ -239,10 +251,8 @@ GeoIntel runs with zero configuration. The following environment variables are o
 | Variable | Required | Default | Description |
 | :--- | :-: | :--- | :--- |
 | `OPENCAGE_API_KEY` | ⛔ | — | Adds timezone, currency, formatted address, and confidence to GeoIP results |
-| `MAX_WORKERS` | ⛔ | `50` | Thread pool size for concurrent collector dispatch |
-| `LOG_FILE` | ⛔ | — | File path for persistent logging |
 
-The OpenCage key is sent directly from the browser — it is never stored or proxied by the backend.
+The OpenCage key lives in browser memory and is proxied through the backend (`POST /api/geocode`). It is never persisted on disk or sent to third parties directly from the browser.
 
 ---
 
