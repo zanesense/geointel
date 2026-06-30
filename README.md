@@ -66,15 +66,32 @@ Three surfaces, one engine:
 
 ```mermaid
 flowchart TD
-    U[User] --> D{" "}
-    D -- Dashboard --> R[React SPA<br/>frontend/]
-    D -- CLI --> C[python -m app<br/>app/__main__.py]
-    D -- API --> F[FastAPI server<br/>app/main.py]
+    U[👤 User] --> D{ }
+
+    D -- "🖥️ Dashboard" --> R["<b>React SPA</b><br/><i>frontend/</i>"]
+    D -- "📟 CLI" --> C["<b>python -m app</b><br/><i>app/__main__.py</i>"]
+    D -- "🔗 API" --> F["<b>FastAPI server</b><br/><i>app/main.py</i>"]
+
     R --> F
-    F --> S[Scanner service<br/>app/services/scanner.py]
-    S --> M[14 collector modules]
-    M --> P[Public sources<br/>ip-api.com, crt.sh, rdap.org, DNS]
-    M --> T[Target host]
+    F --> S["<b>Scanner service</b><br/><i>app/services/scanner.py</i>"]
+    S --> M["<b>14 collector modules</b>"]
+
+    M --> P["<b>Public sources</b><br/>ip‑api.com · crt.sh · rdap.org · DNS"]
+    M --> T["<b>Target host</b>"]
+
+    style U fill:#6c5ce7,stroke:#a29bfe,color:#fff,stroke-width:2px
+    style D fill:#2d3436,stroke:#636e72,color:#dfe6e9,stroke-width:1px
+    style R fill:#0984e3,stroke:#74b9ff,color:#fff,stroke-width:2px
+    style C fill:#00b894,stroke:#55efc4,color:#fff,stroke-width:2px
+    style F fill:#0984e3,stroke:#74b9ff,color:#fff,stroke-width:2px
+    style S fill:#e17055,stroke:#fab1a0,color:#fff,stroke-width:2px
+    style M fill:#d63031,stroke:#ff7675,color:#fff,stroke-width:2px
+    style P fill:#fdcb6e,stroke:#ffeaa7,color:#2d3436,stroke-width:2px
+    style T fill:#e17055,stroke:#fab1a0,color:#fff,stroke-width:2px
+
+    linkStyle 3 stroke:#0984e3,stroke-width:2px
+    linkStyle 4 stroke:#e17055,stroke-width:2px
+    linkStyle 5,6 stroke:#d63031,stroke-width:2px
 ```
 
 The FastAPI backend dispatches each collector in its own thread. Active modules (port scan, connectivity, zone transfer) are gated behind `_require_public_host` — private and loopback addresses are rejected before any socket opens. Passive modules make outbound HTTP or DNS queries to public intelligence sources. The dashboard and CLI share the same scanner code path.
