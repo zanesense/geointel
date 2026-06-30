@@ -457,7 +457,7 @@ complete -c geointel -n "not __fish_seen_subcommand_from lookup scan fullscan hi
 def main():
     parser = argparse.ArgumentParser(
         prog="geointel",
-        description="[bold]GeoIntel[/bold] \u2014 OSINT intelligence from your terminal",
+        description="GeoIntel \u2014 OSINT intelligence from your terminal",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"GeoIntel v{VERSION}")
