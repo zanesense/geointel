@@ -11,10 +11,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.syntax import Syntax
-
 from app.services.scanner import (
-    SCAN_TYPES, full_scan, resolve_domain,
+    SCAN_TYPES, full_scan,
 )
 
 VERSION = "1.0.0"
@@ -24,14 +22,26 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 ALL_TYPES = list(SCAN_TYPES.keys())
 console = Console()
 
-LOGO = r"""
-[cyan]                ██████╗ ███████╗ ██████╗ ██╗███╗   ██╗████████╗███████╗██╗     
-               ██╔════╝ ██╔════╝██╔═══██╗██║████╗  ██║╚══██╔══╝██╔════╝██║     
-               ██║  ███╗█████╗  ██║   ██║██║██╔██╗ ██║   ██║   █████╗  ██║     
-               ██║   ██║██╔══╝  ██║   ██║██║██║╚██╗██║   ██║   ██╔══╝  ██║     
-               ╚██████╔╝███████╗╚██████╔╝██║██║ ╚████║   ██║   ███████╗███████╗
-                ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝[/cyan]
-"""
+class _S:
+    R = "\x1b[0m"
+    BOLD = "\x1b[1m"
+    DIM = "\x1b[2m"
+    GRAY = "\x1b[90m"
+    CYAN = "\x1b[36m"
+    BLUE = "\x1b[34m"
+    GREEN = "\x1b[32m"
+    YELLOW = "\x1b[33m"
+    RED = "\x1b[31m"
+
+s = _S
+LOGO = (
+    f"{s.CYAN}                ██████╗ ███████╗ ██████╗ ██╗███╗   ██╗████████╗███████╗██╗     {s.R}\n"
+    f"{s.CYAN}                ██╔════╝ ██╔════╝██╔═══██╗██║████╗  ██║╚══██╔══╝██╔════╝██║     {s.R}\n"
+    f"{s.CYAN}                ██║  ███╗█████╗  ██║   ██║██║██╔██╗ ██║   ██║   █████╗  ██║     {s.R}\n"
+    f"{s.CYAN}                ██║   ██║██╔══╝  ██║   ██║██║██║╚██╗██║   ██║   ██╔══╝  ██║     {s.R}\n"
+    f"{s.CYAN}                ╚██████╔╝███████╗╚██████╔╝██║██║ ╚████║   ██║   ███████╗███████╗{s.R}\n"
+    f"{s.CYAN}                 ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝{s.R}"
+)
 
 
 def load_config() -> dict:
@@ -71,41 +81,32 @@ def opencage_enrich(lat: float, lon: float, api_key: str) -> dict:
         return {}
 
 
-def print_result_pretty(data: dict, title: str):
+def print_result_pretty(data, target="", title=""):
     if "error" in data:
-        console.print(f"  [red]◆ {data['error']}[/red]")
+        console.print(f"[red]{data['error']}[/red]")
         return
-    if title:
-        console.print(f"[bold cyan]{title}[/bold cyan]")
-    items = list(data.items())
-    for i, (k, v) in enumerate(items):
+    table = Table(border_style="dim", padding=(0, 1))
+    table.add_column("Key", style="dim", no_wrap=True)
+    table.add_column("Value", style="")
+    for k, v in data.items():
         key = k.replace("_", " ").title()
-        is_last = i == len(items) - 1
-        prefix = "└──" if is_last else "├──"
         if isinstance(v, dict):
-            console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]")
-            sub = list(v.items())
-            for j, (sk, sv) in enumerate(sub):
-                sub_last = j == len(sub) - 1
-                sub_prefix = "   └──" if is_last else "   ├──" if sub_last else "   ├──" if not is_last else "   └──"
-                sub_prefix = "   └──" if sub_last else "   ├──"
-                sp = "   " if is_last else "│  "
-                sp = "   " + ("└──" if sub_last else "├──")
-                val = str(sv) if sv is not None else "-"
-                console.print(f"  {sp} [dim]{sk}[/dim]: {val}")
+            for sk, sv in v.items():
+                val = str(sv) if sv is not None else "[dim]-[/dim]"
+                table.add_row(f"  {key} {sk.replace('_', ' ').title()}", val)
         elif isinstance(v, list):
             if not v:
-                console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]: [dim](none)[/dim]")
+                table.add_row(f"  {key}", "[dim](none)[/dim]")
             else:
-                console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]")
-                for j, item in enumerate(v):
-                    s = str(item) if not isinstance(item, dict) else json.dumps(item, default=str)
-                    sp = "   " if is_last else "│  "
-                    sp += "└──" if j == len(v) - 1 else "├──"
-                    console.print(f"  {sp} {s}")
+                for item in v:
+                    s_item = str(item) if not isinstance(item, dict) else json.dumps(item, default=str)
+                    table.add_row(f"  {key}", s_item)
         else:
-            val = str(v) if v is not None else "-"
-            console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]: {val}")
+            val = str(v) if v is not None else "[dim]-[/dim]"
+            table.add_row(f"  {key}", val)
+    if title:
+        console.print(Panel(f"[cyan]{target}[/cyan]", title=f"[bold]{title}[/bold]", border_style="cyan"))
+    console.print(table)
 
 
 def export_csv(data: dict) -> str:
@@ -141,15 +142,13 @@ def show_history():
         if HISTORY_FILE.exists():
             history = json.loads(HISTORY_FILE.read_text())
             if history:
-                console.print(Panel(
-                    "\n".join(f"  [cyan]{i+1}.[/cyan] {t}" for i, t in enumerate(history)),
-                    title="[bold yellow]Recent Targets[/bold yellow]",
-                    border_style="yellow",
-                ))
+                console.print("  [bold yellow]\u25c6 Recent Targets[/bold yellow]")
+                for i, t in enumerate(history):
+                    console.print(f"    [cyan]{i+1}.[/cyan] {t}")
                 return
-        console.print("[dim]No history yet.[/dim]")
+        console.print("  [dim]No history yet.[/dim]")
     except Exception:
-        console.print("[dim]No history yet.[/dim]")
+        console.print("  [dim]No history yet.[/dim]")
 
 
 def _print_simple(data: dict):
@@ -166,7 +165,7 @@ def _print_simple(data: dict):
 
 def run_lookup(args):
     if not args.no_logo and not args.json and not args.simple:
-        console.print(LOGO)
+        print(LOGO)
 
     config = load_config()
     opencage_key = args.opencage_key or os.environ.get("OPENCAGE_API_KEY") or config.get("opencage_key")
@@ -209,18 +208,10 @@ def run_lookup(args):
                         print(export_csv(result))
             else:
                 console.print()
-                console.print()
-                console.print(Panel(
-                    f"[cyan]◆ {args.target}[/cyan]  [dim]Resolved: {output['resolved_ip']}[/dim]",
-                    title="[bold]Full Recon[/bold]",
-                    border_style="cyan",
-                ))
-                console.print()
                 for name, result in results.items():
-                    print_result_pretty(result, name.replace("_", " ").title())
-                    console.print()
+                    print_result_pretty(result, args.target, name.replace("_", " ").title())
                 if errors:
-                    console.print("[bold yellow]Errors:[/bold yellow]")
+                    console.print("[bold red]Errors:[/bold red]")
                     for name, msg in errors.items():
                         console.print(f"  [red]{name}:[/red] {msg}")
 
@@ -254,16 +245,7 @@ def run_lookup(args):
                 else:
                     label = types[0].replace("_", " ").title()
                     console.print()
-                    resolve_ip = ""
-                    if types[0] == "quick":
-                        resolve_ip = f" \u2022 [dim]{resolve_domain(args.target)}[/dim]"
-                    console.print(Panel(
-                        f"[cyan]◆ {args.target}[/cyan]{resolve_ip}",
-                        title=f"[bold]{label}[/bold]",
-                        border_style="cyan",
-                    ))
-                    console.print()
-                    print_result_pretty(data, "")
+                    print_result_pretty(data, args.target, label)
                     console.print()
             else:
                 with console.status("[cyan]Running scans...[/cyan]", spinner="dots") as status:
@@ -304,17 +286,10 @@ def run_lookup(args):
                             print(export_csv(result))
                 else:
                     console.print()
-                    console.print(Panel(
-                        f"[cyan]◆ {args.target}[/cyan]  [dim]{len(types)} scan(s)[/dim]",
-                        title="[bold]Multi Scan[/bold]",
-                        border_style="cyan",
-                    ))
-                    console.print()
                     for t, result in results.items():
-                        print_result_pretty(result, t.replace("_", " ").title())
-                        console.print()
+                        print_result_pretty(result, args.target, t.replace("_", " ").title())
                     if errors:
-                        console.print("[bold yellow]Errors:[/bold yellow]")
+                        console.print("[bold red]Errors:[/bold red]")
                         for name, msg in errors.items():
                             console.print(f"  [red]{name}:[/red] {msg}")
 
@@ -324,7 +299,7 @@ def run_lookup(args):
                     enriched = opencage_enrich(qdata["lat"], qdata["lon"], opencage_key)
                     if enriched:
                         console.print()
-                        print_result_pretty(enriched, "OpenCage Enrichment")
+                        print_result_pretty(enriched, args.target, "OpenCage Enrichment")
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Interrupted.[/yellow]")
@@ -337,16 +312,13 @@ def run_lookup(args):
 def cmd_info(args):
     if not args.no_logo:
         console.print(LOGO)
-    console.print(f"[bold]GeoIntel[/bold] v{VERSION}")
-    console.print(f"[dim]Python {sys.version.split()[0]}[/dim]")
     console.print()
-    console.print("[bold]Available scan types:[/bold]")
-    table = Table(border_style="dim", padding=(0, 1))
-    table.add_column("ID", style="cyan", no_wrap=True)
-    table.add_column("Description", style="")
+    console.print(f"  [bold green]\u25c6 GeoIntel v{VERSION}[/bold green]")
+    console.print(f"  [dim]Python:[/dim] {sys.version.split()[0]}")
+    console.print()
+    console.print("  [bold cyan]\u25c6 Available scan types[/bold cyan]")
     for sid in ALL_TYPES:
-        table.add_row(sid, SCAN_TYPES[sid].__doc__ or "")
-    console.print(table)
+        console.print(f"    [cyan]{sid}[/cyan] \u2014 {SCAN_TYPES[sid].__doc__ or ''}")
 
 
 def cmd_config(args):
@@ -355,9 +327,9 @@ def cmd_config(args):
 
     if args.show:
         if cfg:
-            console.print(json.dumps(cfg, indent=2))
+            print(json.dumps(cfg, indent=2))
         else:
-            console.print("[dim]No configuration set.[/dim]")
+            console.print("  [dim]No configuration set.[/dim]")
         return
 
     if args.set:
@@ -365,58 +337,58 @@ def cmd_config(args):
         key = key.strip()
         value = value.strip()
         if not key or not value:
-            console.print("[red]Usage: --set key=value[/red]")
+            console.print("  [red]Usage: --set key=value[/red]")
             sys.exit(1)
         cfg[key] = value
         save_config(cfg)
-        console.print(f"[green]Set[/green] {key} = {value}")
+        console.print(f"  [green]\u2714[/green] Set [cyan]{key}[/cyan] = {value}")
         return
 
     if args.unset:
         if args.unset in cfg:
             del cfg[args.unset]
             save_config(cfg)
-            console.print(f"[green]Unset[/green] {args.unset}")
+            console.print(f"  [green]\u2714[/green] Unset [cyan]{args.unset}[/cyan]")
         else:
-            console.print(f"[yellow]Key not found:[/yellow] {args.unset}")
+            console.print(f"  [yellow]Key not found:[/yellow] {args.unset}")
         return
 
     if args.reset:
         if CONFIG_FILE.exists():
             CONFIG_FILE.unlink()
-            console.print("[green]Configuration reset.[/green]")
+            console.print("  [green]\u2714[/green] Configuration reset.")
         else:
-            console.print("[dim]No configuration to reset.[/dim]")
+            console.print("  [dim]No configuration to reset.[/dim]")
         return
 
-    console.print("[bold]Current configuration:[/bold]")
+    console.print()
+    console.print("  [bold yellow]\u25c6 Current Configuration[/bold yellow]")
     if cfg:
         for k, v in cfg.items():
-            console.print(f"  [cyan]{k}[/cyan] = {v}")
+            console.print(f"    [cyan]{k}[/cyan] = {v}")
     else:
-        console.print("  [dim](empty)[/dim]")
-    console.print()
-    console.print("[dim]Set values with:[/dim] [cyan]geointel config --set key=value[/cyan]")
+        console.print("    [dim](empty)[/dim]")
+    console.print("  [dim]Set values with:[/dim] [cyan]geointel config --set key=value[/cyan]")
 
 
 def cmd_completion(args):
     shell = args.shell
     if not shutil.which(shell):
-        console.print(f"[red]Shell '{shell}' not found on this system.[/red]")
+        print(f"{s.RED}Shell '{shell}' not found on this system.{s.R}")
         sys.exit(1)
 
     if shell == "bash":
-        print(f"""# GeoIntel completion for bash
-_geointel_completions() {{
-    local cur="${{COMP_WORDS[$COMP_CWORD]}}"
-    local prev="${{COMP_WORDS[$COMP_CWORD-1]}}"
+        print("""# GeoIntel completion for bash
+_geointel_completions() {
+    local cur="${COMP_WORDS[$COMP_CWORD]}"
+    local prev="${COMP_WORDS[$COMP_CWORD-1]}"
     local commands="lookup scan fullscan history info config completion"
     local options="--target -t --type --json --simple --csv --output --opencage-key --no-logo --help"
 
     if [[ $COMP_CWORD -eq 1 ]]; then
         COMPREPLY=($(compgen -W "$commands" -- "$cur"))
     elif [[ $COMP_CWORD -ge 2 ]]; then
-        case "${{COMP_WORDS[1]}}" in
+        case "${COMP_WORDS[1]}" in
             lookup|scan|fullscan)
                 COMPREPLY=($(compgen -W "$options" -- "$cur"))
                 ;;
@@ -428,7 +400,7 @@ _geointel_completions() {{
                 ;;
         esac
     fi
-}}
+}
 complete -F _geointel_completions geointel
 """)
     elif shell == "zsh":
@@ -460,10 +432,12 @@ complete -c geointel -n "not __fish_seen_subcommand_from lookup scan fullscan hi
 complete -c geointel -n "not __fish_seen_subcommand_from lookup scan fullscan history info config completion" -a completion -d "Generate shell completion scripts"
 """)
     else:
-        console.print(f"[red]Unsupported shell: {shell}[/red]")
+        print(f"{s.RED}Unsupported shell: {shell}{s.R}")
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(
         prog="geointel",
         description="GeoIntel \u2014 OSINT intelligence from your terminal",
@@ -552,7 +526,7 @@ def main():
 
     if args.command == "history":
         if not args.no_logo:
-            console.print(LOGO)
+            print(LOGO)
         show_history()
         return
 
@@ -571,7 +545,6 @@ def main():
     if args.command in ("scan", "fullscan"):
         if args.command == "fullscan":
             args.type = "full"
-        # share lookup args for the run function
         args.no_logo = getattr(args, "no_logo", False)
         args.opencage_key = getattr(args, "opencage_key", None)
 

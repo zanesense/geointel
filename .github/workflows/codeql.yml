@@ -43,9 +43,8 @@ jobs:
           config: |
             paths:
               - app
-              - frontend/src
               - api
-              - test_scanner.py
+              - frontend/src
             paths-ignore:
               - "**/node_modules"
               - "**/dist"
