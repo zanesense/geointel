@@ -539,6 +539,8 @@ def main():
 
     args = parser.parse_args()
 
+    console.clear()
+
     if args.command == "history":
         if not args.no_logo:
             console.print(LOGO)
