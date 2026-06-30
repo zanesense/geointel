@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/GeoIntel-OSINT%20Console-%23C9B1FF?style=for-the-badge&labelColor=1a1a2e">
-    <img alt="GeoIntel" src="https://img.shields.io/badge/GeoIntel-OSINT%20Console-%23C9B1FF?style=for-the-badge&labelColor=ffffff">
-  </picture>
+  <img src="screenshots/banner.svg" alt="GeoIntel">
 </p>
 
 <p align="center">
@@ -13,8 +10,6 @@
   <a href="https://vercel.com"><img src="https://img.shields.io/badge/deployed%20on-Vercel-%23000000?logo=vercel&style=flat-square" alt="Vercel"></a>
   <img src="https://img.shields.io/github/last-commit/zanesense/geointel?style=flat-square&label=updated" alt="Last commit">
 </p>
-
-<h3 align="center">IP & domain intelligence — dashboard, CLI, and JSON API in a single workspace</h3>
 
 <p align="center">
   <a href="#quick-start"><b>Quick start →</b></a>
