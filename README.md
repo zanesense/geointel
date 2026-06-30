@@ -147,8 +147,17 @@ Open `http://127.0.0.1:8000`, enter a target, and select collectors from the mod
 ### CLI
 
 ```bash
-# GeoIP lookup (pretty output with map-ready coordinates)
+# Quick GeoIP lookup (pretty output with map-ready coordinates)
   geointel lookup --target 8.8.8.8
+
+# DNS scan
+  geointel scan --target example.com --type dns
+
+# Full recon (all scan types, JSON output)
+  geointel fullscan --target example.com --json
+
+# Show version and available modules
+  geointel info
 
 # DNS records
 python -m app example.com -t dns

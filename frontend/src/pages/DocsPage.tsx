@@ -74,26 +74,47 @@ uvicorn app.main:app --reload`}</code></pre>
 
           <section id="cli">
             <h2>Command line</h2>
-            <pre><code>geointel lookup --target TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--no-logo]</code></pre>
+            <pre><code>geointel lookup --target TARGET [-t TYPE] [--output FORMAT] [--opencage-key KEY] [--no-logo]</code></pre>
+            <h3>Subcommands</h3>
+            <div className="overflow-x-auto rounded-xl border" style={{ borderColor: 'var(--color-hairline)' }}>
+              <table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+                <tr><td><code>lookup</code></td><td>Look up an IP or domain (default: quick GeoIP)</td></tr>
+                <tr><td><code>scan</code></td><td>Run specific scan types</td></tr>
+                <tr><td><code>fullscan</code></td><td>Run all scan types</td></tr>
+                <tr><td><code>history</code></td><td>Show recent scan targets</td></tr>
+                <tr><td><code>info</code></td><td>Show version and available scan types</td></tr>
+                <tr><td><code>config</code></td><td>Manage persistent settings (opencage-key, defaults)</td></tr>
+                <tr><td><code>completion</code></td><td>Generate bash/zsh/fish completion scripts</td></tr>
+              </tbody></table>
+            </div>
             <h3>Examples</h3>
-            <pre><code>{`# DNS records in the default readable format
-geointel lookup --target example.com -t dns
+            <pre><code>{`# Quick GeoIP lookup
+geointel lookup --target 8.8.8.8
 
-# Multi-type scan (runs types concurrently)
-geointel lookup --target example.com -t dns,whois,ssl
+# Specific scan type
+geointel scan --target example.com --type dns
 
-# Active port and service scan
-geointel lookup --target example.com -t ports
+# Multi-type scan (runs concurrently)
+geointel scan --target example.com --type dns,whois,ssl
 
 # All collectors as formatted JSON
-geointel lookup --target example.com -t full --json
+geointel fullscan --target example.com --json
 
-# Export quick GeoIP as CSV
+# Export as CSV
 geointel lookup --target 8.8.8.8 -t quick --csv
 
 # View scan history
-geointel history`}</code></pre>
-            <p>Run <code>geointel lookup --help</code> for the scan types supported by your installed version.</p>
+geointel history
+
+# Show version and available modules
+geointel info
+
+# Set persistent OpenCage key
+geointel config --set opencage_key=abc123
+
+# Generate bash completions
+geointel completion bash > /etc/bash_completion.d/geointel`}</code></pre>
+            <p>Run <code>geointel --help</code> for all available commands.</p>
           </section>
 
           <section id="api">
