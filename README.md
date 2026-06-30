@@ -44,9 +44,9 @@ Three surfaces, one engine:
 
 ## Screenshots
 
-| Dashboard | CLI |
-| :---: | :---: |
-| <img src="screenshots/webapp.png" alt="GeoIntel Dashboard" width="600"> | <img src="screenshots/cli.svg" alt="GeoIntel CLI" width="400"> |
+<img src="screenshots/webapp.png" alt="GeoIntel Dashboard">
+
+<img src="screenshots/cli.svg" alt="GeoIntel CLI">
 
 ---
 
