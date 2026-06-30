@@ -58,7 +58,7 @@ uvicorn app.main:app --reload`}</code></pre>
               <li>Select one intelligence module. Only that collector runs.</li>
               <li>Review the formatted result or export the initial GeoIP record as JSON or CSV.</li>
             </ol>
-            <div className="notice"><strong>Optional enrichment:</strong> Add an OpenCage key from the settings menu to display timezone, currency, formatted address, and confidence. The browser stores the key in local storage.</div>
+            <div className="notice"><strong>Optional enrichment:</strong> Add an OpenCage key from the settings menu to display timezone, currency, formatted address, and confidence. The key is held in memory for the session and never persisted to disk or storage.</div>
           </section>
 
           <section id="collectors">
@@ -74,16 +74,25 @@ uvicorn app.main:app --reload`}</code></pre>
 
           <section id="cli">
             <h2>Command line</h2>
-            <pre><code>python -m app TARGET [-t TYPE] [--json | --simple]</code></pre>
+            <pre><code>python -m app TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--history] [--no-logo]</code></pre>
             <h3>Examples</h3>
             <pre><code>{`# DNS records in the default readable format
 python -m app example.com -t dns
+
+# Multi-type scan (runs types concurrently)
+python -m app example.com -t dns,whois,ssl
 
 # Active port and service scan
 python -m app example.com -t ports
 
 # All collectors as formatted JSON
-python -m app example.com -t full --json`}</code></pre>
+python -m app example.com -t full --json
+
+# Export quick GeoIP as CSV
+python -m app 8.8.8.8 -t quick --csv
+
+# View scan history
+python -m app --history`}</code></pre>
             <p>Run <code>python -m app --help</code> for the scan types supported by your installed version.</p>
           </section>
 
@@ -105,6 +114,7 @@ python -m app example.com -t full --json`}</code></pre>
                 <tr><td><code>/lookup</code></td><td>POST</td><td>Run the initial GeoIP lookup.</td></tr>
                 <tr><td><code>/scan</code></td><td>POST</td><td>Run one collector by ID.</td></tr>
                 <tr><td><code>/full-scan</code></td><td>POST</td><td>Run collectors concurrently and preserve partial results.</td></tr>
+                <tr><td><code>/geocode</code></td><td>POST</td><td>Reverse-geocode lat/lon via OpenCage (key passed in body, never stored).</td></tr>
               </tbody></table>
             </div>
           </section>
