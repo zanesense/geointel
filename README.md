@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshots/banner.svg?v=3" alt="GeoIntel">
+  <img src="screenshots/banner.png" alt="GeoIntel">
 </p>
 
 <p align="center">
