@@ -42,12 +42,20 @@ Three surfaces, one engine:
 
 ---
 
+## Screenshots
+
+| Dashboard | CLI |
+| :---: | :---: |
+| <img src="screenshots/webapp.png" alt="GeoIntel Dashboard" width="600"> | <img src="screenshots/cli.svg" alt="GeoIntel CLI" width="400"> |
+
+---
+
 ## Features
 
 - 🛰️ **14 intelligence modules** — geolocation, DNS, WHOIS, SSL/TLS, HTTP headers, reverse DNS, RDAP, subdomains, email security, web intelligence, public file discovery, port scanning, connectivity checks, and zone-transfer auditing
 - ⚡ **Concurrent full scan** — runs every module in parallel; one failure never discards the rest of the report
 - 🌐 **Interactive dashboard** — Leaflet map, real-time results, OpenCage timezone/currency enrichment
-- 🖥️ **Feature-complete CLI** — pretty, JSON, and flat key-value output modes
+- 🖥️ **Feature-complete CLI** — pretty (Rich-themed), JSON, CSV, and flat key-value output modes, plus OpenCage enrichment and scan history
 - 🔗 **RESTful JSON API** — POST endpoints for single and full scans, designed for automation
 - 🛡️ **Safety-first** — private/reserved addresses rejected for active modules; redirects revalidated; scans bounded to TCP 1–1024 plus select high-value ports
 - 🔌 **Zero API keys required** — all passive collectors query public sources with no registration
@@ -131,7 +139,7 @@ Open `http://127.0.0.1:8000`, enter a target, and select collectors from the mod
 ### CLI
 
 ```bash
-# GeoIP lookup
+# GeoIP lookup (pretty output with map-ready coordinates)
 python -m app 8.8.8.8
 
 # DNS records
@@ -140,11 +148,20 @@ python -m app example.com -t dns
 # Port scan
 python -m app scanme.nmap.org -t ports
 
-# Full reconnaissance (all collectors, JSON output)
+# Full reconnaissance (all 14 collectors, JSON output)
 python -m app example.com -t full --json
 
 # Flat key-value output
 python -m app example.com -t rdap --simple
+
+# CSV export
+python -m app 8.8.8.8 -t quick --csv
+
+# OpenCage enrichment (timezone, currency, formatted address)
+python -m app 8.8.8.8 --opencage-key YOUR_KEY
+
+# View recent scan history
+python -m app --history
 ```
 
 ### REST API

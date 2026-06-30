@@ -8,19 +8,20 @@ export interface OpenCageResult {
   confidence: number;
 }
 
-const OC_KEY = 'geointel_opencage_key';
+const API = window.location.origin;
+
+let _key = '';
 
 export function getOpenCageKey(): string {
-  return localStorage.getItem(OC_KEY) || '';
+  return _key;
 }
 
 export function setOpenCageKey(key: string): void {
-  if (key) localStorage.setItem(OC_KEY, key);
-  else localStorage.removeItem(OC_KEY);
+  _key = key;
 }
 
 export function hasOpenCageKey(): boolean {
-  return !!getOpenCageKey();
+  return !!_key;
 }
 
 export async function reverseGeocode(
@@ -30,22 +31,17 @@ export async function reverseGeocode(
   const key = getOpenCageKey();
   if (!key) return null;
 
-  const res = await fetch(
-    `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${key}&language=en&limit=1`
-  );
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  if (!data.results?.length) return null;
-
-  const r = data.results[0];
-  return {
-    formatted: r.formatted,
-    timezone: r.annotations?.timezone || { name: '', offset_string: '' },
-    currency: r.annotations?.currency || { name: '', symbol: '' },
-    continent: r.components?.continent || '',
-    country: r.components?.country || '',
-    components: r.components || {},
-    confidence: r.confidence,
-  };
+  try {
+    const res = await fetch(`${API}/api/geocode`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lat, lon, api_key: key }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.error || !data.formatted) return null;
+    return data as OpenCageResult;
+  } catch {
+    return null;
+  }
 }

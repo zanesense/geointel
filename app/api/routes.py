@@ -46,6 +46,39 @@ def full_scan(payload: LookupPayload):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+class GeocodePayload(BaseModel):
+    lat: float
+    lon: float
+    api_key: str
+
+
+@router.post("/geocode")
+def geocode(payload: GeocodePayload):
+    import requests as http
+    try:
+        r = http.get(
+            "https://api.opencagedata.com/geocode/v1/json",
+            params={"q": f"{payload.lat},{payload.lon}", "key": payload.api_key, "language": "en", "limit": 1},
+            timeout=10,
+        )
+        data = r.json()
+        if data.get("status", {}).get("code") != 200 or not data.get("results"):
+            return {"error": "Geocoding failed"}
+        result = data["results"][0]
+        annot = result.get("annotations", {})
+        return {
+            "formatted": result.get("formatted", ""),
+            "timezone": annot.get("timezone", {"name": "", "offset_string": ""}),
+            "currency": annot.get("currency", {"name": "", "symbol": ""}),
+            "continent": result.get("components", {}).get("continent", ""),
+            "country": result.get("components", {}).get("country", ""),
+            "components": result.get("components", {}),
+            "confidence": result.get("confidence", 0),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @router.get("/scan-types")
 def scan_types():
     return {
