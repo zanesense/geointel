@@ -223,8 +223,21 @@ def rdap_lookup(target: str) -> dict:
     try:
         host = normalize_target(target)
         kind = "ip" if _is_ip(host) else "domain"
-        response = requests.get(f"https://rdap.org/{kind}/{host}", timeout=15)
-        response.raise_for_status()
+        urls = [
+            f"https://rdap-bootstrap.arin.net/bootstrap/{kind}/{host}",
+            f"https://rdap.org/{kind}/{host}",
+        ]
+        response = None
+        for url in urls:
+            try:
+                response = requests.get(url, timeout=20)
+                response.raise_for_status()
+                break
+            except Exception:
+                continue
+        if response is None:
+            return {"error": "RDAP lookup failed — all providers unreachable"}
+
         data = response.json()
         entities = []
         for entity in data.get("entities", []):
