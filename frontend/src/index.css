@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces — exact from DESIGN.md */
+  --color-canvas: #000000;
+  --color-surface-card: #0a0a0c;
+  --color-surface-elevated: #101012;
+  --color-surface-deep: #06060a;
+  --color-surface-light: #f1f7fe;
+
+  /* Text — exact from DESIGN.md */
+  --color-primary: #fcfdff;
+  --color-primary-on: #000000;
+  --color-ink: #fcfdff;
+  --color-body: rgba(252, 253, 255, 0.86);
+  --color-charcoal: rgba(252, 253, 255, 0.7);
+  --color-mute: #a1a4a5;
+  --color-ash: #888e90;
+  --color-stone: #464a4d;
+  --color-on-light: #000000;
+  --color-on-light-mute: rgba(0, 0, 51, 0.7);
+
+  /* Borders — exact from DESIGN.md */
+  --color-hairline: rgba(255, 255, 255, 0.06);
+  --color-hairline-strong: rgba(255, 255, 255, 0.14);
+  --color-divider-soft: rgba(255, 255, 255, 0.04);
+
+  /* Accents — exact from DESIGN.md */
+  --color-accent-orange: #b7a1ff;
+  --color-accent-orange-glow: rgba(183, 161, 255, 0.22);
+  --color-accent-yellow: #ffc53d;
+  --color-accent-blue: #3b9eff;
+  --color-accent-blue-glow: rgba(0, 117, 255, 0.34);
+  --color-accent-green: #11ff99;
+  --color-accent-green-glow: rgba(34, 255, 153, 0.18);
+  --color-accent-red: #ff2047;
+  --color-accent-red-glow: rgba(255, 32, 71, 0.34);
+  --color-link: #3b9eff;
+
+  /* Radii from DESIGN.md */
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Fonts — Inter = UI, Playfair = display, JetBrains Mono = code */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; }
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-accent-orange);
+  outline-offset: 2px;
+}
+
+.hero-grid {
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 60% at 20% 0%, rgba(183, 161, 255, 0.16), transparent 60%);
+  background-size: 48px 48px, 48px 48px, auto;
+}
+
+.search-shell {
+  background: rgba(10, 10, 12, .88);
+  border: 1px solid rgba(255,255,255,.17);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 18px 60px rgba(0,0,0,.4), 0 0 0 1px rgba(183,161,255,.04);
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-shell:focus-within {
+  border-color: rgba(183,161,255,.55);
+  box-shadow: 0 18px 60px rgba(0,0,0,.4), 0 0 0 3px rgba(183,161,255,.08);
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent-orange);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.page-title {
+  max-width: 850px;
+  margin: 0 0 20px;
+  color: var(--color-ink);
+  font: 400 clamp(42px, 7vw, 72px)/1 var(--font-display);
+  letter-spacing: -.04em;
+}
+.page-lead {
+  max-width: 700px;
+  color: var(--color-charcoal);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.docs-prose section {
+  margin-bottom: 64px;
+  scroll-margin-top: 96px;
+}
+.docs-prose h2 {
+  margin: 0 0 18px;
+  color: var(--color-ink);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -.02em;
+}
+.docs-prose h3 {
+  margin: 30px 0 12px;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+.docs-prose p, .docs-prose li {
+  color: var(--color-charcoal);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.docs-prose p { margin: 0 0 16px; }
+.docs-prose ol { margin: 0 0 20px; padding-left: 22px; list-style: decimal; }
+.docs-prose a { color: var(--color-accent-orange); text-decoration: underline; text-underline-offset: 3px; }
+.docs-prose code { color: var(--color-ink); font-family: var(--font-mono); font-size: .9em; }
+.docs-prose pre {
+  margin: 18px 0 24px;
+  padding: 18px;
+  overflow-x: auto;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-deep);
+  color: var(--color-body);
+  font: 12px/1.75 var(--font-mono);
+}
+.docs-prose table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.docs-prose th, .docs-prose td { padding: 13px 15px; text-align: left; border-bottom: 1px solid var(--color-hairline); }
+.docs-prose th { color: var(--color-ink); background: var(--color-surface-elevated); font-weight: 500; }
+.docs-prose td { color: var(--color-charcoal); background: var(--color-surface-card); vertical-align: top; }
+.docs-prose tr:last-child td { border-bottom: 0; }
+.notice {
+  padding: 16px 18px;
+  border: 1px solid rgba(183,161,255,.22);
+  border-radius: var(--radius-lg);
+  background: rgba(183,161,255,.06);
+  color: var(--color-charcoal);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+::selection {
+  background: var(--color-accent-orange);
+  color: #000;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-hairline-strong); border-radius: var(--radius-full); }
+
+/* ── Glows (atmospheric only, never solid) ── */
+.glow-orange {
+  background: radial-gradient(ellipse 75% 45% at 50% -8%, rgba(183, 161, 255, 0.18) 0%, transparent 55%);
+}
+.glow-blue {
+  background: radial-gradient(ellipse 75% 45% at 50% -8%, rgba(0, 117, 255, 0.14) 0%, transparent 55%);
+}
+
+/* ── Card surfaces ── */
+.card { background: var(--color-surface-card); border-radius: var(--radius-lg); }
+.card-elevated { background: var(--color-surface-elevated); border-radius: var(--radius-lg); }
+.card-deep { background: var(--color-surface-deep); border-radius: var(--radius-lg); }
+
+/* ── Hairline grid (1px gaps between children) ── */
+.hairline-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--color-hairline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.hairline-grid > * {
+  background: var(--color-surface-card);
+}
+
+/* ── Record list ── */
+.record-list {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.record-list > * + * {
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* ── Leaflet overrides ── */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: var(--radius-lg);
+}
+.leaflet-popup-content-wrapper {
+  font-family: var(--font-body) !important;
+  background: var(--color-surface-card) !important;
+  color: var(--color-ink) !important;
+  border: 1px solid var(--color-hairline-strong) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: none !important;
+}
+.leaflet-popup-tip {
+  background: var(--color-surface-card) !important;
+  border: 1px solid var(--color-hairline-strong) !important;
+}
+.leaflet-popup-content { margin: 12px 16px !important; font-size: 13px !important; }
+.leaflet-control-zoom a {
+  background: var(--color-surface-card) !important;
+  color: var(--color-ink) !important;
+  border-color: var(--color-hairline-strong) !important;
+}
+.leaflet-control-zoom a:hover { background: var(--color-surface-elevated) !important; }
+.leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: var(--color-mute) !important;
+}
+.leaflet-control-attribution a { color: var(--color-accent-orange) !important; }
