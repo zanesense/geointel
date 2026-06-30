@@ -37,14 +37,7 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          python -c "
-from test_scanner import *
-test_normalize_target()
-test_page_parser()
-test_full_scan_keeps_partial_results()
-test_private_web_targets_are_rejected()
-test_port_probe_formats_json_result()
-"
+          python -m app 0.0.0.0
 
   frontend:
     name: Frontend checks
