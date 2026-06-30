@@ -125,44 +125,19 @@ def show_history():
         console.print("[dim]No history yet.[/dim]")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="[bold]GeoIntel[/bold] \u2014 OSINT intelligence from your terminal",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Examples:\n"
-            "  python -m app 8.8.8.8\n"
-            "  python -m app 8.8.8.8 -t dns\n"
-            "  python -m app 8.8.8.8 -t dns,whois,ssl\n"
-            "  python -m app google.com -t full\n"
-            "  python -m app 8.8.8.8 --json\n"
-            "  python -m app 8.8.8.8 -t quick --csv\n"
-        ),
-    )
-    parser.add_argument("target", nargs="?", help="IP address or domain name to look up")
-    parser.add_argument("-t", "--type", default="quick",
-                        help="Scan type(s), comma-separated (default: quick)")
-    parser.add_argument("--json", action="store_true", help="Output raw JSON")
-    parser.add_argument("--simple", action="store_true", help="Flat key: value output")
-    parser.add_argument("--csv", action="store_true", help="Export results as CSV")
-    parser.add_argument("--opencage-key",
-                        help="OpenCage API key for reverse geocoding "
-                             "(also: OPENCAGE_API_KEY env var)")
-    parser.add_argument("--history", action="store_true",
-                        help="Show recent scan history")
-    parser.add_argument("--no-logo", action="store_true",
-                        help="Skip logo on startup")
+def _print_simple(data: dict):
+    for k, v in data.items():
+        if isinstance(v, list):
+            for item in v:
+                print(f"  {k}: {item}")
+        elif isinstance(v, dict):
+            for sk, sv in v.items():
+                print(f"  {k}.{sk}: {sv}")
+        else:
+            print(f"  {k}: {v}")
 
-    args = parser.parse_args()
 
-    if args.history:
-        show_history()
-        return
-
-    if not args.target:
-        parser.print_help()
-        sys.exit(1)
-
+def run_lookup(args):
     if not args.no_logo and not args.json and not args.simple:
         console.print(LOGO)
 
@@ -328,16 +303,46 @@ def main():
         sys.exit(1)
 
 
-def _print_simple(data: dict):
-    for k, v in data.items():
-        if isinstance(v, list):
-            for item in v:
-                print(f"  {k}: {item}")
-        elif isinstance(v, dict):
-            for sk, sv in v.items():
-                print(f"  {k}.{sk}: {sv}")
-        else:
-            print(f"  {k}: {v}")
+def main():
+    parser = argparse.ArgumentParser(
+        description="[bold]GeoIntel[/bold] \u2014 OSINT intelligence from your terminal",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    lookup = sub.add_parser("lookup", help="Look up an IP address or domain",
+        epilog=(
+            "Examples:\n"
+            "  geoip lookup --target 8.8.8.8\n"
+            "  geoip lookup --target 8.8.8.8 --type dns\n"
+            "  geoip lookup --target 8.8.8.8 --type dns,whois,ssl\n"
+            "  geoip lookup --target google.com --type full\n"
+            "  geoip lookup --target 8.8.8.8 --json\n"
+            "  geoip lookup --target 8.8.8.8 --type quick --csv\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    lookup.add_argument("--target", help="IP address or domain name to look up")
+    lookup.add_argument("-t", "--type", default="quick",
+                        help="Scan type(s), comma-separated (default: quick)")
+    lookup.add_argument("--json", action="store_true", help="Output raw JSON")
+    lookup.add_argument("--simple", action="store_true", help="Flat key: value output")
+    lookup.add_argument("--csv", action="store_true", help="Export results as CSV")
+    lookup.add_argument("--opencage-key",
+                        help="OpenCage API key for reverse geocoding "
+                             "(also: OPENCAGE_API_KEY env var)")
+    lookup.add_argument("--no-logo", action="store_true", help="Skip logo on startup")
+
+    history = sub.add_parser("history", help="Show recent scan history")
+    history.add_argument("--no-logo", action="store_true", help="Skip logo on startup")
+
+    args = parser.parse_args()
+
+    if args.command == "history":
+        show_history()
+        return
+
+    run_lookup(args)
 
 
 if __name__ == "__main__":

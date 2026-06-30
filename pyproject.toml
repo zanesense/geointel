@@ -1,0 +1,8 @@
+[project]
+name = "geointel"
+version = "1.0.0"
+description = "OSINT intelligence from your terminal"
+requires-python = ">=3.10"
+
+[project.scripts]
+geoip = "app.__main__:main"

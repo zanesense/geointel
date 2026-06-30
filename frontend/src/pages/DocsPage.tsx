@@ -74,26 +74,26 @@ uvicorn app.main:app --reload`}</code></pre>
 
           <section id="cli">
             <h2>Command line</h2>
-            <pre><code>python -m app TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--history] [--no-logo]</code></pre>
+            <pre><code>geoip lookup --target TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--no-logo]</code></pre>
             <h3>Examples</h3>
             <pre><code>{`# DNS records in the default readable format
-python -m app example.com -t dns
+geoip lookup --target example.com -t dns
 
 # Multi-type scan (runs types concurrently)
-python -m app example.com -t dns,whois,ssl
+geoip lookup --target example.com -t dns,whois,ssl
 
 # Active port and service scan
-python -m app example.com -t ports
+geoip lookup --target example.com -t ports
 
 # All collectors as formatted JSON
-python -m app example.com -t full --json
+geoip lookup --target example.com -t full --json
 
 # Export quick GeoIP as CSV
-python -m app 8.8.8.8 -t quick --csv
+geoip lookup --target 8.8.8.8 -t quick --csv
 
 # View scan history
-python -m app --history`}</code></pre>
-            <p>Run <code>python -m app --help</code> for the scan types supported by your installed version.</p>
+geoip history`}</code></pre>
+            <p>Run <code>geoip lookup --help</code> for the scan types supported by your installed version.</p>
           </section>
 
           <section id="api">

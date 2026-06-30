@@ -35,6 +35,9 @@ jobs:
           pip install ruff
           ruff check app/ test_scanner.py
 
+      - name: Install package
+        run: pip install -e .
+
       - name: Run smoke tests
         run: |
           python -c "
@@ -45,6 +48,9 @@ test_full_scan_keeps_partial_results()
 test_private_web_targets_are_rejected()
 test_port_probe_formats_json_result()
 "
+
+      - name: Test CLI
+        run: geoip lookup --target 0.0.0.0 --no-logo --simple
 
   frontend:
     name: Frontend checks
