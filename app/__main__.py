@@ -539,7 +539,7 @@ def main():
 
     args = parser.parse_args()
 
-    console.clear()
+    os.system("cls" if os.name == "nt" else "clear")
 
     if args.command == "history":
         if not args.no_logo:
