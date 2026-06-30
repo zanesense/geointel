@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>GeoIntel Recon</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header>
+  <h1>Geo<span>Intel</span></h1>
+  <div class="tag">REAL OSINT GEO RECON</div>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+    <h3>Target</h3>
+    <input id="target" placeholder="IP / Domain (example.com)" />
+    <button onclick="scan()">Scan</button>
+    <div id="results"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Map</h3>
+    <div id="map"></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="map.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
