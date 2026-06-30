@@ -313,12 +313,12 @@ def main():
     lookup = sub.add_parser("lookup", help="Look up an IP address or domain",
         epilog=(
             "Examples:\n"
-            "  geoip lookup --target 8.8.8.8\n"
-            "  geoip lookup --target 8.8.8.8 --type dns\n"
-            "  geoip lookup --target 8.8.8.8 --type dns,whois,ssl\n"
-            "  geoip lookup --target google.com --type full\n"
-            "  geoip lookup --target 8.8.8.8 --json\n"
-            "  geoip lookup --target 8.8.8.8 --type quick --csv\n"
+            "  geointel lookup --target 8.8.8.8\n"
+            "  geointel lookup --target 8.8.8.8 --type dns\n"
+            "  geointel lookup --target 8.8.8.8 --type dns,whois,ssl\n"
+            "  geointel lookup --target google.com --type full\n"
+            "  geointel lookup --target 8.8.8.8 --json\n"
+            "  geointel lookup --target 8.8.8.8 --type quick --csv\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

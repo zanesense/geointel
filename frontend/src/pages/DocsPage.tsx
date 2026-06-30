@@ -74,26 +74,26 @@ uvicorn app.main:app --reload`}</code></pre>
 
           <section id="cli">
             <h2>Command line</h2>
-            <pre><code>geoip lookup --target TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--no-logo]</code></pre>
+            <pre><code>geointel lookup --target TARGET [-t TYPE] [--json | --simple | --csv] [--opencage-key KEY] [--no-logo]</code></pre>
             <h3>Examples</h3>
             <pre><code>{`# DNS records in the default readable format
-geoip lookup --target example.com -t dns
+geointel lookup --target example.com -t dns
 
 # Multi-type scan (runs types concurrently)
-geoip lookup --target example.com -t dns,whois,ssl
+geointel lookup --target example.com -t dns,whois,ssl
 
 # Active port and service scan
-geoip lookup --target example.com -t ports
+geointel lookup --target example.com -t ports
 
 # All collectors as formatted JSON
-geoip lookup --target example.com -t full --json
+geointel lookup --target example.com -t full --json
 
 # Export quick GeoIP as CSV
-geoip lookup --target 8.8.8.8 -t quick --csv
+geointel lookup --target 8.8.8.8 -t quick --csv
 
 # View scan history
-geoip history`}</code></pre>
-            <p>Run <code>geoip lookup --help</code> for the scan types supported by your installed version.</p>
+geointel history`}</code></pre>
+            <p>Run <code>geointel lookup --help</code> for the scan types supported by your installed version.</p>
           </section>
 
           <section id="api">

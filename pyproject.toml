@@ -5,4 +5,4 @@ description = "OSINT intelligence from your terminal"
 requires-python = ">=3.10"
 
 [project.scripts]
-geoip = "app.__main__:main"
+geointel = "app.__main__:main"
