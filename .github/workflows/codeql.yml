@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: "0 6 * * 1"
 
+permissions:
+  security-events: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -38,6 +41,7 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           source-root: .
+          ram: 4096
           config: |
             paths:
               - app
