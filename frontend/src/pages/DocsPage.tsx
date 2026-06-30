@@ -1,3 +1,5 @@
+import { useReveal } from '../utils/reveal';
+
 const tools = [
   ['Quick GeoIP', 'quick', 'Geolocation, ISP, organization, and ASN'],
   ['DNS Analysis', 'dns', 'A, AAAA, MX, NS, TXT, SOA, CNAME, and PTR records'],
@@ -16,6 +18,8 @@ const tools = [
 ];
 
 export default function DocsPage() {
+  const sectionsRef = useReveal<HTMLDivElement>({ stagger: 0.1 });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
       <div className="mb-14 max-w-3xl">
@@ -33,7 +37,7 @@ export default function DocsPage() {
           </nav>
         </aside>
 
-        <article className="docs-prose min-w-0">
+        <article ref={sectionsRef} className="docs-prose min-w-0">
           <section id="quick-start">
             <h2>Quick start</h2>
             <p>Install the Python dependencies, build the frontend, and start FastAPI from the repository root.</p>

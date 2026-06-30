@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Activity, CheckCircle2, XCircle } from 'lucide-react';
 import { fetchScanTypes } from '../api';
+import { useReveal } from '../utils/reveal';
 
 export default function StatusPage() {
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const cardRef = useReveal<HTMLDivElement>();
   const [tools, setTools] = useState(0);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function StatusPage() {
       <h1 className="page-title">GeoIntel service health.</h1>
       <p className="page-lead mb-10">This page checks the local API directly. It does not test third-party providers or target availability.</p>
 
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-hairline-strong)', background: 'var(--color-surface-card)' }}>
+      <div ref={cardRef} className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--color-hairline-strong)', background: 'var(--color-surface-card)' }}>
         <div className="p-5 sm:p-6 flex items-center justify-between gap-4 border-b" style={{ borderColor: 'var(--color-hairline)' }}>
           <div className="flex items-center gap-3">
             {status === 'checking' ? <Activity className="w-5 h-5 animate-pulse" style={{ color: 'var(--color-accent-yellow)' }} /> : online ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--color-accent-green)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--color-accent-red)' }} />}

@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react';
+import { useReveal } from '../utils/reveal';
 
 const groups = [
   { title: 'Product', links: [['Workspace', '/'], ['System status', '/status']] },
@@ -7,8 +8,10 @@ const groups = [
 ];
 
 export default function Footer() {
+  const footerRef = useReveal<HTMLElement>();
+
   return (
-    <footer className="border-t" style={{ borderColor: 'var(--color-hairline)', background: 'var(--color-surface-deep)' }}>
+    <footer ref={footerRef} className="border-t" style={{ borderColor: 'var(--color-hairline)', background: 'var(--color-surface-deep)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid gap-10 md:grid-cols-[1.5fr_2fr]">
           <div>

@@ -7,6 +7,7 @@ import MapView from './MapView';
 import { fetchScanTypes, runScan } from '../api';
 import { exportAsJson, exportAsCsv } from '../utils/export';
 import { reverseGeocode, hasOpenCageKey } from '../utils/opencage';
+import { useReveal } from '../utils/reveal';
 import type { GeoIntelResult, FullScanResult, ScanResult, ScanType } from '../types';
 import type { OpenCageResult } from '../utils/opencage';
 
@@ -24,6 +25,9 @@ export default function Dashboard() {
   const [ocResult, setOcResult] = useState<OpenCageResult | null>(null);
   const [ocLoading, setOcLoading] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const heroRef = useReveal<HTMLDivElement>();
+  const statsRef = useReveal<HTMLDivElement>({ stagger: 0.12 });
+  const intelRef = useReveal<HTMLDivElement>({ trigger: '#intel-modules' });
 
   useEffect(() => {
     fetchScanTypes()
@@ -84,7 +88,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-canvas)' }}>
       {/* Hero */}
-      <section className="hero-grid px-4 sm:px-6 pb-16 border-b" style={{ borderColor: 'var(--color-hairline)' }}>
+      <section ref={heroRef} className="hero-grid px-4 sm:px-6 pb-16 border-b" style={{ borderColor: 'var(--color-hairline)' }}>
         <div className="max-w-7xl mx-auto pt-20 sm:pt-28 pb-10">
           <div
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] uppercase tracking-[.14em] mb-7"
@@ -106,7 +110,7 @@ export default function Dashboard() {
               </p>
               <SearchBar onSearch={search} loading={loading} />
             </div>
-            <div className="hidden lg:grid grid-cols-2 gap-px rounded-xl overflow-hidden border" style={{ background: 'var(--color-hairline)', borderColor: 'var(--color-hairline)' }}>
+            <div ref={statsRef} className="hidden lg:grid grid-cols-2 gap-px rounded-xl overflow-hidden border" style={{ background: 'var(--color-hairline)', borderColor: 'var(--color-hairline)' }}>
               {[['15', 'scan modes'], ['1K+', 'TCP ports'], ['3', 'public files'], ['1', 'target workflow']].map(([value, metric]) => (
                 <div key={metric} className="p-5" style={{ background: 'rgba(10,10,12,.8)' }}>
                   <div className="text-2xl mb-1" style={{ color: 'var(--color-ink)', fontFamily: 'var(--font-mono)' }}>{value}</div>
@@ -221,7 +225,7 @@ export default function Dashboard() {
             </div>
 
             {/* Intelligence tools */}
-            <div className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--color-hairline-strong)', borderRadius: 'var(--radius-lg)' }}>
+            <div id="intel-modules" ref={intelRef} className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--color-hairline-strong)', borderRadius: 'var(--radius-lg)' }}>
               <div className="px-4 sm:px-5 py-5" style={{ background: 'var(--color-surface-card)' }}>
                 <div className="flex items-center justify-between gap-3 mb-5">
                   <div>
