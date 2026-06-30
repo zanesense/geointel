@@ -74,7 +74,7 @@ def quick_scan(target: str) -> dict:
     import requests as http
     ip = resolve_domain(target)
     url = f"http://ip-api.com/json/{ip}?fields=status,message,continent,country,regionName,city,lat,lon,isp,org,as,query"
-    r = http.get(url, timeout=10)
+    r = http.get(url, timeout=15)
     data = r.json()
     if data.get("status") != "success":
         return {"error": data.get("message", "GeoIP lookup failed")}
@@ -181,7 +181,7 @@ def http_headers_lookup(target: str) -> dict:
     try:
         hostname = _require_public_host(target)
         url = f"https://{hostname}"
-        r = _public_get(url, timeout=10)
+        r = _public_get(url, timeout=(5, 15))
         headers = dict(r.headers)
         security = {}
         sec_headers = [
@@ -223,7 +223,7 @@ def rdap_lookup(target: str) -> dict:
     try:
         host = normalize_target(target)
         kind = "ip" if _is_ip(host) else "domain"
-        response = requests.get(f"https://rdap.org/{kind}/{host}", timeout=12)
+        response = requests.get(f"https://rdap.org/{kind}/{host}", timeout=15)
         response.raise_for_status()
         data = response.json()
         entities = []
@@ -252,7 +252,7 @@ def subdomain_lookup(target: str) -> dict:
         host = normalize_target(target)
         if _is_ip(host):
             raise ValueError("Certificate transparency lookup requires a domain")
-        response = requests.get("https://crt.sh/", params={"q": f"%.{host}", "output": "json"}, timeout=15)
+        response = requests.get("https://crt.sh/", params={"q": f"%.{host}", "output": "json"}, timeout=20)
         response.raise_for_status()
         names = {
             name.strip().lower().removeprefix("*.")
@@ -323,7 +323,7 @@ def web_intel_lookup(target: str) -> dict:
     """Public homepage metadata and lightweight technology signals."""
     try:
         host = _require_public_host(target)
-        response = _public_get(f"https://{host}", timeout=12)
+        response = _public_get(f"https://{host}", timeout=(5, 20))
         response.raise_for_status()
         parser = _PageIntelParser()
         parser.feed(response.text[:2_000_000])
@@ -352,7 +352,7 @@ def public_files_lookup(target: str) -> dict:
         host = _require_public_host(target)
         found = {}
         for path in ("/robots.txt", "/sitemap.xml", "/.well-known/security.txt"):
-            response = _public_get(f"https://{host}{path}", timeout=8)
+            response = _public_get(f"https://{host}{path}", timeout=(5, 12))
             if response.ok:
                 found[path] = {"url": response.url, "content_type": response.headers.get("content-type"), "preview": response.text[:1000]}
         return {"found": found}

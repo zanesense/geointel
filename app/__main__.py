@@ -35,7 +35,7 @@ def opencage_enrich(lat: float, lon: float, api_key: str) -> dict:
         r = requests.get(
             "https://api.opencagedata.com/geocode/v1/json",
             params={"q": f"{lat},{lon}", "key": api_key},
-            timeout=10,
+            timeout=15,
         )
         data = r.json()
         if data.get("status", {}).get("code") == 200 and data.get("results"):

@@ -59,7 +59,7 @@ def geocode(payload: GeocodePayload):
         r = http.get(
             "https://api.opencagedata.com/geocode/v1/json",
             params={"q": f"{payload.lat},{payload.lon}", "key": payload.api_key, "language": "en", "limit": 1},
-            timeout=10,
+            timeout=15,
         )
         data = r.json()
         if data.get("status", {}).get("code") != 200 or not data.get("results"):
