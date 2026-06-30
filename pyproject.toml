@@ -6,3 +6,7 @@ requires-python = ">=3.10"
 
 [project.scripts]
 geointel = "app.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["app*", "api*"]
+exclude = ["frontend*", "data*", "screenshots*"]
