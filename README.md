@@ -1,67 +1,64 @@
-# GeoIntel
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/GeoIntel-OSINT%20Console-%23C9B1FF?style=for-the-badge&labelColor=1a1a2e">
+    <img alt="GeoIntel" src="https://img.shields.io/badge/GeoIntel-OSINT%20Console-%23C9B1FF?style=for-the-badge&labelColor=ffffff">
+  </picture>
+</p>
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/zanesense/geointel/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zanesense/geointel/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI"></a>
+  <a href="https://github.com/zanesense/geointel/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/zanesense/geointel/codeql.yml?branch=main&label=CodeQL&logo=github&style=flat-square" alt="CodeQL"></a>
+  <a href="https://github.com/zanesense/geointel/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-%233776AB?logo=python&logoColor=white&style=flat-square" alt="Python"></a>
+  <a href="https://vercel.com"><img src="https://img.shields.io/badge/deployed%20on-Vercel-%23000000?logo=vercel&style=flat-square" alt="Vercel"></a>
+  <img src="https://img.shields.io/github/last-commit/zanesense/geointel?style=flat-square&label=updated" alt="Last commit">
+</p>
 
-> python -m app example.com -t full --json
+<h3 align="center">IP & domain intelligence — dashboard, CLI, and JSON API in a single workspace</h3>
 
-IP and domain OSINT workspace with a web dashboard, JSON API, and command-line interface. GeoIntel combines common infrastructure lookups — geolocation, DNS, WHOIS, SSL, HTTP headers, RDAP, subdomains, email security, port scanning, and more — in one application. Each collector runs independently; the full-scan mode runs every collector concurrently.
+<p align="center">
+  <a href="#-quick-start"><b>Quick start →</b></a>
+  &nbsp;·&nbsp;
+  <a href="#-usage"><b>Usage →</b></a>
+  &nbsp;·&nbsp;
+  <a href="#-collectors"><b>Collectors →</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://geointel-eight.vercel.app"><b>Live demo →</b></a>
+</p>
 
-> ⚠️ **Authorization is non-negotiable.** Port scanning, banner collection, connectivity checks, and zone-transfer checks are active. Only use this tool on assets you own or have explicit written authorization to test.
+---
 
-## Table of Contents
+## Overview
 
-- [Features](#features)
-- [Collectors](#collectors)
-- [How It Works](#how-it-works)
-- [Repository Structure](#repository-structure)
-- [Tech Stack](#tech-stack)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Testing](#testing)
-- [API Reference](#api-reference)
-- [Examples](#examples)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
-- [Security and Legal Use](#security-and-legal-use)
+GeoIntel is an open-source OSINT workspace that consolidates 14 infrastructure intelligence modules behind a single interface. Enter an IP address, domain name, or URL and get back geolocation, DNS records, WHOIS registration, SSL certificate details, HTTP security headers, RDAP metadata, subdomain discoveries, email security posture, port scans, and more.
+
+Three surfaces, one engine:
+
+- **Dashboard** — React SPA with interactive map, per-module result views, and optional OpenCage enrichment
+- **CLI** — `python -m app` with formatted output for pipelining and scripting
+- **JSON API** — RESTful endpoints returning structured results for integration
+
+> ⚠️ **Authorization is non-negotiable.** Port scanning, banner collection, connectivity checks, and DNS zone-transfer probes are active operations. Use this tool only on assets you own or have written permission to test.
+
+---
 
 ## Features
 
-- 🛰️ **14 intelligence collectors** — GeoIP, DNS, WHOIS, SSL, HTTP, reverse DNS, RDAP, subdomains, email security, web intel, public files, port scan, connectivity, zone transfer.
-- 🌐 **Web dashboard** — React SPA with interactive map, per-collector result views, and optional OpenCage enrichment.
-- 🖥️ **JSON API** — RESTful endpoints for every collector, returning structured JSON for integration.
-- 📟 **Command-line interface** — `python -m app` with pretty, JSON, and simple output formats.
-- ⚡ **Concurrent full scan** — Runs all collectors in parallel with partial-results resilience (one failure does not discard the rest).
-- 🛡️ **Safety-first design** — Private/reserved addresses rejected for active modules; redirects revalidated; port scan bounded to TCP 1–1024 plus select high-value ports.
-- 🔌 **No external dependencies for core collectors** — No API keys required; all passive lookups use public sources.
+- 🛰️ **14 intelligence modules** — geolocation, DNS, WHOIS, SSL/TLS, HTTP headers, reverse DNS, RDAP, subdomains, email security, web intelligence, public file discovery, port scanning, connectivity checks, and zone-transfer auditing
+- ⚡ **Concurrent full scan** — runs every module in parallel; one failure never discards the rest of the report
+- 🌐 **Interactive dashboard** — Leaflet map, real-time results, OpenCage timezone/currency enrichment
+- 🖥️ **Feature-complete CLI** — pretty, JSON, and flat key-value output modes
+- 🔗 **RESTful JSON API** — POST endpoints for single and full scans, designed for automation
+- 🛡️ **Safety-first** — private/reserved addresses rejected for active modules; redirects revalidated; scans bounded to TCP 1–1024 plus select high-value ports
+- 🔌 **Zero API keys required** — all passive collectors query public sources with no registration
 
-## Collectors
+---
 
-| ID | Operation | Target | Type |
-| --- | :-: | --- | :-: |
-| `quick` | IP geolocation, ISP, organisation, and ASN | IP or domain | Passive |
-| `dns` | A, AAAA, MX, NS, TXT, SOA, CNAME, and PTR records | IP or domain | Passive |
-| `whois` | Registrar, dates, status, nameservers, and contacts | Domain | Passive |
-| `ssl` | Certificate subject, issuer, validity, and SANs | Public domain | Passive |
-| `http` | Response and security headers | Public domain | Passive |
-| `reverse` | Reverse DNS hostname and aliases | IP or domain | Passive |
-| `rdap` | Structured IP or domain registration records | IP or domain | Passive |
-| `subdomains` | Certificate-transparency subdomains from crt.sh | Domain | Passive |
-| `email` | MX, SPF, and DMARC posture | Domain | Passive |
-| `web` | Page metadata, technology signals, public emails, and social links | Public domain | Passive |
-| `files` | `robots.txt`, `sitemap.xml`, and `security.txt` | Public domain | Passive |
-| `ports` | TCP ports 1–1024, selected high-value ports, and service banners | Public IP or domain | Active |
-| `connectivity` | TCP reachability and latency for SSH, SMTP, DNS, HTTP, and HTTPS | Public IP or domain | Active |
-| `zone_transfer` | AXFR exposure checks against authoritative nameservers | Domain | Active |
-
-`full` runs every collector concurrently via the CLI and `/api/full-scan` API. The dashboard runs one collector at a time.
-
-## How It Works
+## Architecture
 
 ```mermaid
 flowchart TD
-    U[User] --> D{Surface}
+    U[User] --> D{" "}
     D -- Dashboard --> R[React SPA<br/>frontend/]
     D -- CLI --> C[python -m app<br/>app/__main__.py]
     D -- API --> F[FastAPI server<br/>app/main.py]
@@ -72,229 +69,120 @@ flowchart TD
     M --> T[Target host]
 ```
 
-Requests flow through the FastAPI backend to the scanner service, which dispatches each collector in its own thread. Active collectors (port scan, connectivity, zone transfer) are sandboxed behind the `_require_public_host` gate — they reject private and loopback addresses. Passive collectors make outbound HTTP or DNS queries to public intelligence sources. The dashboard communicates with the backend over REST; the CLI calls the same scanner functions directly.
+The FastAPI backend dispatches each collector in its own thread. Active modules (port scan, connectivity, zone transfer) are gated behind `_require_public_host` — private and loopback addresses are rejected before any socket opens. Passive modules make outbound HTTP or DNS queries to public intelligence sources. The dashboard and CLI share the same scanner code path.
 
-## Repository Structure
+---
 
-```text
-geointel/
-├── api/
-│   └── index.py              # Vercel serverless entry point (Mangum)
-├── app/
-│   ├── __main__.py            # CLI entry point (python -m app)
-│   ├── main.py                # FastAPI application factory
-│   ├── api/
-│   │   └── routes.py          # REST endpoint definitions
-│   ├── core/
-│   │   └── geointel.py        # Core data models
-│   ├── services/
-│   │   └── scanner.py         # All 14 collector implementations
-│   └── static/                # Legacy static frontend assets
-├── frontend/
-│   ├── src/
-│   │   ├── components/        # React UI components
-│   │   ├── pages/             # Docs, Status, Terms pages
-│   │   ├── utils/             # OpenCage geocoding, export helpers
-│   │   ├── api.ts             # Backend API client
-│   │   ├── App.tsx            # Root SPA component
-│   │   └── main.tsx           # App entry point
-│   ├── public/                # Static assets (favicon, icons)
-│   ├── vite.config.ts         # Vite build configuration
-│   └── package.json
-├── requirements.txt           # Python dependencies
-├── vercel.json                # Vercel deployment configuration
-└── test_scanner.py            # Backend smoke tests
-```
+## Collectors
 
-## Tech Stack
+| ID | Module | Target | Type | Operation |
+| :--- | :--- | :--- | :-: | :--- |
+| `quick` | GeoIP | IP or domain | Passive | ISP, organisation, ASN, continent → city coordinates |
+| `dns` | DNS Analysis | IP or domain | Passive | A, AAAA, MX, NS, TXT, SOA, CNAME, PTR records |
+| `whois` | WHOIS | Domain | Passive | Registrar, dates, status, name servers, contacts |
+| `ssl` | SSL/TLS | Public domain | Passive | Certificate subject, issuer, validity, SANs |
+| `http` | HTTP Headers | Public domain | Passive | Server info, security headers, status code |
+| `reverse` | Reverse DNS | IP or domain | Passive | PTR records and hostname resolution |
+| `rdap` | RDAP | IP or domain | Passive | Structured registration data |
+| `subdomains` | Subdomains | Domain | Passive | Certificate transparency (crt.sh) discoveries |
+| `email` | Email Security | Domain | Passive | MX, SPF, and DMARC posture |
+| `web` | Web Intelligence | Public domain | Passive | Metadata, technology signatures, emails, social links |
+| `files` | Public Files | Public domain | Passive | `robots.txt`, `sitemap.xml`, `security.txt` |
+| `ports` | Port & Service Scan | Public IP or domain | Active | TCP 1–1024 + high-value ports, service banners |
+| `connectivity` | Connectivity | Public IP or domain | Active | Reachability and latency for SSH, SMTP, DNS, HTTP(S) |
+| `zone_transfer` | Zone Transfer | Domain | Active | AXFR exposure check against authoritative name servers |
 
-| Layer | Choice |
-| --- | --- |
-| Framework | [FastAPI](https://fastapi.tiangolo.com/) + [Vite 8](https://vitejs.dev/) / [React 19](https://react.dev/) |
-| Language | [Python 3.12+](https://python.org/) + [TypeScript 6](https://www.typescriptlang.org/) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Maps | [Leaflet](https://leafletjs.com/) |
-| CLI runtime | Python (`python -m app`) |
-| Deployment | [Vercel](https://vercel.com/) (Python serverless + static) or local `uvicorn` |
+The `full` meta-module runs all 14 concurrently via the CLI (`-t full`) or API (`/api/full-scan`).
 
-## Requirements
+---
 
-- **Python 3.10+** (3.12 recommended for Vercel deployment)
-- **Node.js 20+** and **npm** (for building the frontend)
-- No external API keys required for core functionality
-
-## Installation
-
-### Web app (local)
+## Quick start
 
 ```bash
 # 1. Install Python dependencies
 python -m pip install -r requirements.txt
 
 # 2. Build the frontend
-cd frontend
-npm install
-npm run build
-cd ..
+cd frontend && npm install && npm run build && cd ..
 
-# 3. Start the server
+# 3. Start
 uvicorn app.main:app --reload
 ```
 
 ```text
-http://127.0.0.1:8000
+→ http://127.0.0.1:8000
 ```
 
-### CLI only
+### CLI-only (no frontend build)
 
 ```bash
 python -m pip install -r requirements.txt
 python -m app example.com -t dns
 ```
 
-## Configuration
-
-GeoIntel runs without any configuration. Optional settings are exposed through environment variables:
-
-| Variable | Required | Default | Description |
-| --- | :-: | --- | --- |
-| `OPENCAGE_API_KEY` | ⛔ | none | Enables timezone, currency, and formatted address in GeoIP results (configured in the dashboard UI) |
-| `MAX_WORKERS` | ⛔ | `50` | Thread pool size for concurrent collectors |
-
-The OpenCage key is sent directly from the browser to OpenCage — it is not stored or proxied by the backend.
+---
 
 ## Usage
 
 ### Dashboard
 
-Start the server and open `http://127.0.0.1:8000`. Enter an IP, domain, or URL in the search bar. After the initial GeoIP result appears, select any collector from the module list to run an additional scan.
+Open `http://127.0.0.1:8000`, enter a target, and select collectors from the module list. Results appear in real time with an interactive map for GeoIP lookups.
 
 ### CLI
 
 ```bash
-# Basic GeoIP lookup
+# GeoIP lookup
 python -m app 8.8.8.8
 
-# Specific collector
+# DNS records
 python -m app example.com -t dns
 
-# Active port scan
-python -m app example.com -t ports
+# Port scan
+python -m app scanme.nmap.org -t ports
 
-# All collectors, JSON output
+# Full reconnaissance (all collectors, JSON output)
 python -m app example.com -t full --json
 
-# Flat key/value output
+# Flat key-value output
 python -m app example.com -t rdap --simple
 ```
-
-Run `python -m app --help` for the full list of scan types.
 
 ### REST API
 
 ```bash
-# List all scan types
+# List modules
 curl http://127.0.0.1:8000/api/scan-types
 
-# Run one collector
+# Single module
 curl -X POST http://127.0.0.1:8000/api/scan \
   -H 'Content-Type: application/json' \
   -d '{"target":"example.com","scan_type":"dns"}'
 
-# Run all collectors
+# Full scan (all collectors)
 curl -X POST http://127.0.0.1:8000/api/full-scan \
   -H 'Content-Type: application/json' \
   -d '{"target":"example.com"}'
 ```
 
-Full scans return successful results under `results` and failed collectors under `errors` — one upstream failure does not discard the rest of the report.
+Full scans return `{"results":{…}, "errors":{…}}` — one module failure never discards the rest.
 
-## Testing
-
-```bash
-# Frontend checks
-cd frontend
-npm run lint
-npm run build
-cd ..
-
-# Backend smoke tests (no framework required)
-python -c "from test_scanner import *; test_normalize_target(); test_page_parser(); test_full_scan_keeps_partial_results(); test_private_web_targets_are_rejected(); test_port_probe_formats_json_result()"
-```
-
-## API Reference
-
-### `GET /api/scan-types`
-
-Returns the list of available collectors.
-
-**Response:**
-```json
-{
-  "types": [
-    { "id": "dns", "name": "DNS Analysis", "description": "A, AAAA, MX, NS records", "icon": "Network" }
-  ]
-}
-```
-
-### `POST /api/scan`
-
-Run a single collector.
-
-**Request:**
-```json
-{ "target": "example.com", "scan_type": "dns" }
-```
-
-**Response:** Collector-specific JSON.
-
-### `POST /api/full-scan`
-
-Run every collector concurrently.
-
-**Request:**
-```json
-{ "target": "example.com" }
-```
-
-**Response:**
-```json
-{
-  "target": "example.com",
-  "resolved_ip": "93.184.216.34",
-  "results": { "quick": { ... }, "dns": { ... } },
-  "errors": null
-}
-```
-
-## Examples
-
-> ⚠️ Only scan systems you own or have written authorisation to test. The targets below are safe demonstration hosts.
-
-| Target | Suggested collectors | Notes |
-| --- | --- | --- |
-| `8.8.8.8` | `quick`, `reverse`, `rdap` | Google public DNS — known geography |
-| `example.com` | `dns`, `whois`, `ssl`, `http` | IANA reserved domain — low rate-limit risk |
-| `github.com` | `web`, `subdomains`, `ports` | Large attack surface, may rate-limit |
+---
 
 ## Deployment
 
-| Path | Front-end | Backend | Notes |
-| --- | --- | --- | --- |
-| **Vercel** (recommended) | `frontend/dist/` (static) | Python serverless (`api/index.py`) | Auto-scaling, zero maintenance |
-| **Local / VPS** | `frontend/dist/` (served by FastAPI) | `uvicorn` process | Full functionality, raw sockets work |
+| Method | Frontend | Backend | Active modules | Effort |
+| :--- | :--- | :--- | :-: | :--- |
+| **Vercel** (recommended) | Static (`frontend/dist/`) | Python serverless | ❌ | One click |
+| **Local / VPS** | FastAPI-served | `uvicorn` | ✅ | `pip install + build` |
+| **Docker** | Nginx-served | `uvicorn` | ✅ | `docker compose up` |
+
+> Active modules (port scan, connectivity, zone transfer) use raw sockets and do **not** work in Vercel's serverless sandbox. Run them locally or on a VPS.
 
 ### Vercel
 
-Import the repository into Vercel. `vercel.json` handles the build and routing automatically:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fzanesense%2Fgeointel)
 
-- Frontend built with `cd frontend && npm install && npm run build`
-- API requests under `/api/*` routed to the Python serverless function
-- All other routes serve the SPA's `index.html`
-
-```bash
-vercel --prod
-```
+The repository includes `vercel.json` — importing it into Vercel automatically configures the build pipeline, route rewrites, and Python serverless function.
 
 ### Local production
 
@@ -305,29 +193,104 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 ```text
-http://localhost:8000
+→ http://localhost:8000
 ```
 
-> Production runs `uvicorn` (not the Vite dev server). The built frontend is served directly by FastAPI.
+---
+
+## Configuration
+
+GeoIntel runs with zero configuration. The following environment variables are optional:
+
+| Variable | Required | Default | Description |
+| :--- | :-: | :--- | :--- |
+| `OPENCAGE_API_KEY` | ⛔ | — | Adds timezone, currency, formatted address, and confidence to GeoIP results |
+| `MAX_WORKERS` | ⛔ | `50` | Thread pool size for concurrent collector dispatch |
+| `LOG_FILE` | ⛔ | — | File path for persistent logging |
+
+The OpenCage key is sent directly from the browser — it is never stored or proxied by the backend.
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+| :--- | :--- |
+| Backend framework | [FastAPI](https://fastapi.tiangolo.com/) |
+| Frontend framework | [React 19](https://react.dev/) + [Vite 8](https://vitejs.dev/) |
+| Language | [Python 3.12](https://python.org/) + [TypeScript 6](https://www.typescriptlang.org/) |
+| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
+| Maps | [Leaflet](https://leafletjs.com/) |
+| CLI runtime | `python -m app` |
+| Deployment | [Vercel](https://vercel.com/) (Python + static) · `uvicorn` (local) |
+| CI / CD | GitHub Actions · CodeQL · Dependabot |
+
+---
+
+## Requirements
+
+- **Python 3.10+** (3.12 recommended for Vercel)
+- **Node.js 20+** and **npm** (for frontend builds)
+- Zero external API keys
+
+---
+
+## Testing
+
+```bash
+# Backend smoke tests (no framework required)
+python -c "
+from test_scanner import *
+test_normalize_target()
+test_page_parser()
+test_full_scan_keeps_partial_results()
+test_private_web_targets_are_rejected()
+test_port_probe_formats_json_result()
+"
+
+# Frontend checks
+cd frontend
+npm run lint       # ESLint
+npm test           # TypeScript type-check + Vite production build
+```
+
+CI automatically runs both suites on every push and pull request to `main`.
+
+---
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
-| --- | --- | --- |
+| :--- | :--- | :--- |
 | Dashboard shows blank page or 404 | Frontend not built | `cd frontend && npm install && npm run build` |
-| Collector returns error | Target unsuitable for that module or source unreachable | Use a domain for WHOIS/subdomains/email; verify network connectivity to crt.sh, RDAP, etc. |
+| Collector returns error | Target unsuitable or upstream source unreachable | Use a domain for WHOIS/subdomains/email; verify network access to external APIs |
 | Port 8000 in use | Another process on that port | `uvicorn app.main:app --port 8080` |
-| Active modules fail on Vercel | Serverless sandbox restricts raw sockets | Run locally or on a VPS for port/connectivity/zone-transfer scans |
+| Active modules fail on Vercel | Serverless sandbox restricts raw sockets | Run locally or on a VPS for port scanning and connectivity checks |
+| API returns 500 | Python dependency not installed | `python -m pip install -r requirements.txt` |
 
-## Security and Legal Use
+---
 
-- ✅ **Authorization required** — Only scan systems you own or have permission to test.
-- ✅ **Private-address rejection** — Loopback, reserved, and RFC 1918 addresses are rejected for active modules.
-- ✅ **Redirect revalidation** — HTTP redirects are checked before following.
-- ✅ **Bounded active scanning** — Port scan limited to TCP 1–1024 plus select high-value ports; short timeouts.
-- ❌ **No exploitation** — Does not brute-force, fuzz, or bypass access controls.
-- ❌ **No data persistence** — Results are returned in the response and are not stored server-side.
+## Security and legal use
 
-## License
+- ✅ **Authorization required** — only scan systems you own or have permission to test
+- ✅ **Private-address rejection** — loopback, RFC 1918, and reserved addresses are blocked for active modules
+- ✅ **Redirect revalidation** — HTTP redirects are verified before following
+- ✅ **Bounded scanning** — port scan covers TCP 1–1024 plus select high-value ports with short timeouts
+- ❌ **No exploitation** — does not brute-force, fuzz, or bypass access controls
+- ❌ **No data persistence** — results returned in the response only, never stored server-side
 
-MIT
+---
+
+<p align="center">
+  <a href="https://github.com/zanesense/geointel">GitHub</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/zanesense/geointel/issues">Issue tracker</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/zanesense/geointel/security/policy">Security</a>
+  &nbsp;·&nbsp;
+  <a href="https://geointel-eight.vercel.app">Live demo</a>
+</p>
+
+<p align="center">
+  <a href="LICENSE">MIT</a>
+</p>
