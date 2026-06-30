@@ -5,6 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from rich.console import Console
 from rich.panel import Panel
@@ -15,6 +16,7 @@ from app.services.scanner import (
 )
 
 HISTORY_FILE = Path.home() / ".geointel_history"
+ALL_TYPES = list(SCAN_TYPES.keys())
 console = Console()
 
 LOGO = r"""
@@ -131,6 +133,7 @@ def main():
             "Examples:\n"
             "  python -m app 8.8.8.8\n"
             "  python -m app 8.8.8.8 -t dns\n"
+            "  python -m app 8.8.8.8 -t dns,whois,ssl\n"
             "  python -m app google.com -t full\n"
             "  python -m app 8.8.8.8 --json\n"
             "  python -m app 8.8.8.8 -t quick --csv\n"
@@ -138,8 +141,7 @@ def main():
     )
     parser.add_argument("target", nargs="?", help="IP address or domain name to look up")
     parser.add_argument("-t", "--type", default="quick",
-                        choices=list(SCAN_TYPES.keys()) + ["full"],
-                        help="Scan type (default: quick)")
+                        help="Scan type(s), comma-separated (default: quick)")
     parser.add_argument("--json", action="store_true", help="Output raw JSON")
     parser.add_argument("--simple", action="store_true", help="Flat key: value output")
     parser.add_argument("--csv", action="store_true", help="Export results as CSV")
@@ -168,68 +170,86 @@ def main():
 
     fmt = "json" if args.json else ("simple" if args.simple else ("csv" if args.csv else "pretty"))
 
+    types = [t.strip() for t in args.type.split(",")]
+    for t in types:
+        if t not in ALL_TYPES and t != "full":
+            console.print(f"[red]Unknown scan type:[/red] {t}")
+            console.print(f"[dim]Available: {', '.join(ALL_TYPES)}, full[/dim]")
+            sys.exit(1)
+
+    run_opencage = opencage_key and any(t == "quick" for t in types)
+
     try:
-        with console.status("[cyan]Scanning...[/cyan]", spinner="dots") as status:
-            if args.type == "full":
+        if "full" in types:
+            with console.status("[cyan]Running full scan...[/cyan]", spinner="dots") as status:
                 output = full_scan(args.target)
                 results, errors = output["results"], output["errors"]
                 save_history(args.target)
+                status.update("")
 
-                if fmt == "json":
-                    status.update("")
-                    print(json.dumps(output, indent=2, default=str))
-                elif fmt == "simple":
-                    status.update("")
-                    for name, result in results.items():
-                        print(f"=== {name} ===")
-                        _print_simple(result)
-                    if errors:
-                        print("=== errors ===")
-                        for name, msg in errors.items():
-                            print(f"  {name}: {msg}")
-                elif fmt == "csv":
-                    status.update("")
-                    for name, result in results.items():
-                        if isinstance(result, dict) and "error" not in result:
-                            print(f"# {name}")
-                            print(export_csv(result))
-                else:
-                    status.update("")
-                    console.print()
-                    console.print(Panel(
-                        f"[cyan]{args.target}[/cyan] \u2022 [dim]Resolved: {output['resolved_ip']}[/dim]",
-                        title="[bold]Full Recon[/bold]",
-                        border_style="cyan",
-                    ))
-                    console.print()
-                    for name, result in results.items():
-                        label = name.replace("_", " ").title()
-                        print_result_pretty(result, label)
-                        console.print()
-                    if errors:
-                        console.print("[bold yellow]Errors:[/bold yellow]")
-                        for name, msg in errors.items():
-                            console.print(f"  [red]{name}:[/red] {msg}")
+            if fmt == "json":
+                print(json.dumps(output, indent=2, default=str))
+            elif fmt == "simple":
+                for name, result in results.items():
+                    print(f"=== {name} ===")
+                    _print_simple(result)
+                if errors:
+                    print("=== errors ===")
+                    for name, msg in errors.items():
+                        print(f"  {name}: {msg}")
+            elif fmt == "csv":
+                for name, result in results.items():
+                    if isinstance(result, dict) and "error" not in result:
+                        print(f"# {name}")
+                        print(export_csv(result))
             else:
-                fn = SCAN_TYPES[args.type]
-                data = fn(args.target)
+                console.print()
+                console.print(Panel(
+                    f"[cyan]{args.target}[/cyan] \u2022 [dim]Resolved: {output['resolved_ip']}[/dim]",
+                    title="[bold]Full Recon[/bold]",
+                    border_style="cyan",
+                ))
+                console.print()
+                for name, result in results.items():
+                    print_result_pretty(result, name.replace("_", " ").title())
+                    console.print()
+                if errors:
+                    console.print("[bold yellow]Errors:[/bold yellow]")
+                    for name, msg in errors.items():
+                        console.print(f"  [red]{name}:[/red] {msg}")
+
+        else:
+            results = {}
+            errors = {}
+
+            if len(types) == 1:
+                with console.status(f"[cyan]Running {types[0]}...[/cyan]", spinner="dots") as status:
+                    data = SCAN_TYPES[types[0]](args.target)
+                    status.update("")
+
+                if "error" in data:
+                    errors[types[0]] = data["error"]
+                else:
+                    results[types[0]] = data
                 save_history(args.target)
 
                 if fmt == "json":
-                    status.update("")
                     print(json.dumps(data, indent=2, default=str))
                 elif fmt == "simple":
-                    status.update("")
-                    _print_simple(data)
+                    if "error" in data:
+                        print(f"  error: {data['error']}")
+                    else:
+                        _print_simple(data)
                 elif fmt == "csv":
-                    status.update("")
-                    print(export_csv(data))
+                    if "error" in data:
+                        print(f"error: {data['error']}")
+                    else:
+                        print(export_csv(data))
                 else:
-                    status.update("")
-                    label = args.type.replace("_", " ").title()
+                    label = types[0].replace("_", " ").title()
                     console.print()
                     resolve_ip = ""
-                    if args.type == "quick":
+                    if types[0] == "quick":
                         resolve_ip = f" \u2022 [dim]{resolve_domain(args.target)}[/dim]"
                     console.print(Panel(
                         f"[cyan]{args.target}[/cyan]{resolve_ip}",
@@ -239,9 +259,63 @@ def main():
                     console.print()
                     print_result_pretty(data, "")
                     console.print()
+            else:
+                with console.status("[cyan]Running scans...[/cyan]", spinner="dots") as status:
+                    with ThreadPoolExecutor(max_workers=min(4, len(types))) as pool:
+                        futures = {pool.submit(SCAN_TYPES[t], args.target): t for t in types}
+                        for future in as_completed(futures):
+                            t = futures[future]
+                            try:
+                                data = future.result()
+                                if "error" in data:
+                                    errors[t] = data["error"]
+                                else:
+                                    results[t] = data
+                            except Exception as e:
+                                errors[t] = str(e)
+                    status.update("")
 
-                if args.type == "quick" and opencage_key and "lat" in data and "lon" in data:
-                    enriched = opencage_enrich(data["lat"], data["lon"], opencage_key)
+                save_history(args.target)
+
+                if fmt == "json":
+                    print(json.dumps({
+                        "target": args.target,
+                        "results": results,
+                        "errors": errors or None,
+                    }, indent=2, default=str))
+                elif fmt == "simple":
+                    for t, result in results.items():
+                        print(f"=== {t} ===")
+                        _print_simple(result)
+                    if errors:
+                        print("=== errors ===")
+                        for name, msg in errors.items():
+                            print(f"  {name}: {msg}")
+                elif fmt == "csv":
+                    for t, result in results.items():
+                        if "error" not in result:
+                            print(f"# {t}")
+                            print(export_csv(result))
+                else:
+                    console.print()
+                    console.print(Panel(
+                        f"[cyan]{args.target}[/cyan] \u2022 [dim]{len(types)} scan(s)[/dim]",
+                        title="[bold]Multi Scan[/bold]",
+                        border_style="cyan",
+                    ))
+                    console.print()
+                    for t, result in results.items():
+                        print_result_pretty(result, t.replace("_", " ").title())
+                        console.print()
+                    if errors:
+                        console.print("[bold yellow]Errors:[/bold yellow]")
+                        for name, msg in errors.items():
+                            console.print(f"  [red]{name}:[/red] {msg}")
+
+            if run_opencage:
+                qdata = results.get("quick", {})
+                if "lat" in qdata and "lon" in qdata:
+                    enriched = opencage_enrich(qdata["lat"], qdata["lon"], opencage_key)
                     if enriched:
                         console.print()
                         print_result_pretty(enriched, "OpenCage Enrichment")

@@ -158,6 +158,9 @@ python -m app 8.8.8.8
 # DNS records
 python -m app example.com -t dns
 
+# Multiple scans (comma-separated)
+python -m app example.com -t dns,whois,ssl,http
+
 # Port scan
 python -m app scanme.nmap.org -t ports
 
