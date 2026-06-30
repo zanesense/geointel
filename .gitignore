@@ -7,3 +7,12 @@ __pycache__/
 graphify-out/
 .opencode/
 
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+.next/
+coverage/
