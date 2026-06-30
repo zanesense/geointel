@@ -66,32 +66,28 @@ Three surfaces, one engine:
 
 ```mermaid
 flowchart TD
-    U[👤 User] --> D{ }
+    U[User] --> D{ }
 
-    D -- "🖥️ Dashboard" --> R["<b>React SPA</b><br/><i>frontend/</i>"]
-    D -- "📟 CLI" --> C["<b>python -m app</b><br/><i>app/__main__.py</i>"]
-    D -- "🔗 API" --> F["<b>FastAPI server</b><br/><i>app/main.py</i>"]
+    D -- Dashboard --> R["<b>React SPA</b><br/><i>frontend/</i>"]
+    D -- CLI --> C["<b>python -m app</b><br/><i>app/__main__.py</i>"]
+    D -- API --> F["<b>FastAPI server</b><br/><i>app/main.py</i>"]
 
     R --> F
     F --> S["<b>Scanner service</b><br/><i>app/services/scanner.py</i>"]
     S --> M["<b>14 collector modules</b>"]
 
-    M --> P["<b>Public sources</b><br/>ip‑api.com · crt.sh · rdap.org · DNS"]
+    M --> P["<b>Public sources</b><br/>ip-api.com · crt.sh · rdap.org · DNS"]
     M --> T["<b>Target host</b>"]
 
-    style U fill:#6c5ce7,stroke:#a29bfe,color:#fff,stroke-width:2px
-    style D fill:#2d3436,stroke:#636e72,color:#dfe6e9,stroke-width:1px
-    style R fill:#0984e3,stroke:#74b9ff,color:#fff,stroke-width:2px
-    style C fill:#00b894,stroke:#55efc4,color:#fff,stroke-width:2px
-    style F fill:#0984e3,stroke:#74b9ff,color:#fff,stroke-width:2px
-    style S fill:#e17055,stroke:#fab1a0,color:#fff,stroke-width:2px
-    style M fill:#d63031,stroke:#ff7675,color:#fff,stroke-width:2px
-    style P fill:#fdcb6e,stroke:#ffeaa7,color:#2d3436,stroke-width:2px
-    style T fill:#e17055,stroke:#fab1a0,color:#fff,stroke-width:2px
-
-    linkStyle 3 stroke:#0984e3,stroke-width:2px
-    linkStyle 4 stroke:#e17055,stroke-width:2px
-    linkStyle 5,6 stroke:#d63031,stroke-width:2px
+    style U fill:#1a1a2e,stroke:#4a4a6a,color:#e0e0e0,stroke-width:2px
+    style D fill:#2d2d44,stroke:#555577,color:#cccccc,stroke-width:1px
+    style R fill:#1e3a5f,stroke:#3a6a9e,color:#e0e0e0,stroke-width:2px
+    style C fill:#1e4d3a,stroke:#3a8a6a,color:#e0e0e0,stroke-width:2px
+    style F fill:#1e3a5f,stroke:#3a6a9e,color:#e0e0e0,stroke-width:2px
+    style S fill:#4a2a1e,stroke:#7a4a3a,color:#e0e0e0,stroke-width:2px
+    style M fill:#3a1e2e,stroke:#6a3a4e,color:#e0e0e0,stroke-width:2px
+    style P fill:#3a3a2e,stroke:#6a6a4e,color:#e0e0e0,stroke-width:2px
+    style T fill:#4a2a1e,stroke:#7a4a3a,color:#e0e0e0,stroke-width:2px
 ```
 
 The FastAPI backend dispatches each collector in its own thread. Active modules (port scan, connectivity, zone transfer) are gated behind `_require_public_host` — private and loopback addresses are rejected before any socket opens. Passive modules make outbound HTTP or DNS queries to public intelligence sources. The dashboard and CLI share the same scanner code path.
