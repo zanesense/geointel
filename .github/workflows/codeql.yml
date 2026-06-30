@@ -34,11 +34,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - run: pip install -r requirements.txt
+
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v2
         with:
           languages: ${{ matrix.language }}
-          ram: 4096
           config: |
             paths:
               - app
@@ -52,6 +53,4 @@ jobs:
               - "**/__pycache__"
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          ram: 4096
+        uses: github/codeql-action/analyze@v2
