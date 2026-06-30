@@ -1,0 +1,4 @@
+# Each owner line is a file pattern followed by one or more @owner users or teams.
+# Order matters: the last matching pattern takes precedence.
+
+* @zanesense
