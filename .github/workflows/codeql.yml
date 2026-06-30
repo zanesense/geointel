@@ -27,7 +27,6 @@ jobs:
           - language: javascript-typescript
             build-mode: none
           - language: python
-            build-mode: none
 
     steps:
       - uses: actions/checkout@v4
@@ -36,11 +35,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - if: matrix.language == 'python'
+        run: pip install -r requirements.txt
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          build-mode: ${{ matrix.build-mode || 'none' }}
           source-root: .
           ram: 4096
           config: |
