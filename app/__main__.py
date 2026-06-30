@@ -73,31 +73,39 @@ def opencage_enrich(lat: float, lon: float, api_key: str) -> dict:
 
 def print_result_pretty(data: dict, title: str):
     if "error" in data:
-        console.print(f"  [red]✗ {data['error']}[/red]")
+        console.print(f"  [red]◆ {data['error']}[/red]")
         return
-    table = Table(title=title, title_style="bold cyan", border_style="dim", padding=(0, 1))
-    table.add_column("Field", style="dim", no_wrap=True, min_width=20)
-    table.add_column("Value", style="")
-    for k, v in data.items():
+    if title:
+        console.print(f"[bold cyan]{title}[/bold cyan]")
+    items = list(data.items())
+    for i, (k, v) in enumerate(items):
         key = k.replace("_", " ").title()
+        is_last = i == len(items) - 1
+        prefix = "└──" if is_last else "├──"
         if isinstance(v, dict):
-            table.add_row(f"[dim]{key}[/dim]", "")
-            for sk, sv in v.items():
-                sval = str(sv) if sv is not None else "[dim]-[/dim]"
-                table.add_row(f"  [dim]{sk}[/dim]", sval)
+            console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]")
+            sub = list(v.items())
+            for j, (sk, sv) in enumerate(sub):
+                sub_last = j == len(sub) - 1
+                sub_prefix = "   └──" if is_last else "   ├──" if sub_last else "   ├──" if not is_last else "   └──"
+                sub_prefix = "   └──" if sub_last else "   ├──"
+                sp = "   " if is_last else "│  "
+                sp = "   " + ("└──" if sub_last else "├──")
+                val = str(sv) if sv is not None else "-"
+                console.print(f"  {sp} [dim]{sk}[/dim]: {val}")
         elif isinstance(v, list):
             if not v:
-                table.add_row(f"[dim]{key}[/dim]", "[dim](none)[/dim]")
+                console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]: [dim](none)[/dim]")
             else:
-                first = str(v[0]) if not isinstance(v[0], dict) else json.dumps(v[0], default=str)
-                table.add_row(f"[dim]{key}[/dim]", first)
-                for item in v[1:]:
+                console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]")
+                for j, item in enumerate(v):
                     s = str(item) if not isinstance(item, dict) else json.dumps(item, default=str)
-                    table.add_row("", s)
+                    sp = "   " if is_last else "│  "
+                    sp += "└──" if j == len(v) - 1 else "├──"
+                    console.print(f"  {sp} {s}")
         else:
-            val = str(v) if v is not None else "[dim]-[/dim]"
-            table.add_row(f"[dim]{key}[/dim]", val)
-    console.print(table)
+            val = str(v) if v is not None else "-"
+            console.print(f"  [cyan]{prefix}[/cyan] [dim]{key}[/dim]: {val}")
 
 
 def export_csv(data: dict) -> str:
@@ -201,8 +209,9 @@ def run_lookup(args):
                         print(export_csv(result))
             else:
                 console.print()
+                console.print()
                 console.print(Panel(
-                    f"[cyan]{args.target}[/cyan] \u2022 [dim]Resolved: {output['resolved_ip']}[/dim]",
+                    f"[cyan]◆ {args.target}[/cyan]  [dim]Resolved: {output['resolved_ip']}[/dim]",
                     title="[bold]Full Recon[/bold]",
                     border_style="cyan",
                 ))
@@ -249,7 +258,7 @@ def run_lookup(args):
                     if types[0] == "quick":
                         resolve_ip = f" \u2022 [dim]{resolve_domain(args.target)}[/dim]"
                     console.print(Panel(
-                        f"[cyan]{args.target}[/cyan]{resolve_ip}",
+                        f"[cyan]◆ {args.target}[/cyan]{resolve_ip}",
                         title=f"[bold]{label}[/bold]",
                         border_style="cyan",
                     ))
@@ -296,7 +305,7 @@ def run_lookup(args):
                 else:
                     console.print()
                     console.print(Panel(
-                        f"[cyan]{args.target}[/cyan] \u2022 [dim]{len(types)} scan(s)[/dim]",
+                        f"[cyan]◆ {args.target}[/cyan]  [dim]{len(types)} scan(s)[/dim]",
                         title="[bold]Multi Scan[/bold]",
                         border_style="cyan",
                     ))
